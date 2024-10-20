@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/src/controller/Main.java" dialect="SQL92" />
+    <file url="file://$PROJECT_DIR$/src/model/Workout.java" dialect="SQL92" />
+    <file url="file://$PROJECT_DIR$/src/service/WorkoutService.java" dialect="SQL92" />
+    <file url="file://$PROJECT_DIR$/src/view/CoachMenu.java" dialect="SQL92" />
+    <file url="PROJECT" dialect="SQL92" />
+  </component>
+</project>

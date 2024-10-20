@@ -20,7 +20,7 @@ public class CoachMenu {
             @Override
             public void execute(int ch) throws ClassNotFoundException {
                 switch (ch) {
-                    case 1 -> courseService.add(null, coachId);
+                    case 1 -> courseService.add(coachId);
                     case 2 -> courseService.update(null);
                     case 3 -> courseService.delete(null);
                 }

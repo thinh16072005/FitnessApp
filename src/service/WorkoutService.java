@@ -11,7 +11,7 @@ import java.util.Scanner;
 public class WorkoutService {
     Scanner scanner = new Scanner(System.in);
 
-    public void add(Workout workout) {
+    public void add() {
         String workoutName = Utils.getProperName("Enter workout name: ");
         String nutrition = Utils.getProperName("Enter nutrition: ");
         double bmi = Utils.getPositiveDouble("Enter BMI", scanner);

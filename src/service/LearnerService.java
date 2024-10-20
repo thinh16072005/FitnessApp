@@ -13,7 +13,7 @@ public class LearnerService {
     Scanner scanner = new Scanner(System.in);
     LearnerRepo learnerRepo = new LearnerRepo();
 
-    public void add(Learner learner) {
+    public void add() {
         String firstName = Utils.getProperName("Enter first name: ");
         String lastName = Utils.getProperName("Enter last name: ");
         String email = Utils.getValidEmail("Enter email: ");

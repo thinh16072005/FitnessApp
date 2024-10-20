@@ -14,23 +14,29 @@ public class CoachService {
     Scanner scanner = new Scanner(System.in);
     CoachRepo coachRepo = new CoachRepo();
 
-    public void add(Coach coach) {
+    public void add() {
         String coachFirstName = Utils.getProperName("Enter coach's first name: ");
         String coachLastName = Utils.getProperName("Enter coach's last name: ");
         String coachEmail = Utils.getValidEmail("Enter coach's email: ");
         String coachPhoneNumber = Utils.getPhoneNumber("Enter coach's phone number: ");
-        try {
-            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO tblCoach VALUES (?, ?, ?, ?, ?)");
-            preparedStatement.setString(1, autoGenerateCoachID(conn));
-            preparedStatement.setString(2, coachFirstName);
-            preparedStatement.setString(3, coachLastName);
-            preparedStatement.setString(4, coachEmail);
-            preparedStatement.setString(5, coachPhoneNumber);
-            preparedStatement.executeUpdate();
-            System.out.println("Coach added");
-        } catch (SQLException e) {
-            System.err.println("SQL Exception: " + e.getMessage());
+        String confirm = Utils.getString("Is this information correct? (Y/N): ", scanner);
+        if (confirm.equalsIgnoreCase("Y")) {
+            try {
+                Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+                PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO tblCoach VALUES (?, ?, ?, ?, ?)");
+                preparedStatement.setString(1, autoGenerateCoachID(conn));
+                preparedStatement.setString(2, coachFirstName);
+                preparedStatement.setString(3, coachLastName);
+                preparedStatement.setString(4, coachEmail);
+                preparedStatement.setString(5, coachPhoneNumber);
+                preparedStatement.executeUpdate();
+                System.out.println("Coach added");
+            } catch (SQLException e) {
+                System.err.println("SQL Exception: " + e.getMessage());
+            }
+        }
+        else {
+            System.out.println("Coach not added");
         }
     }
 

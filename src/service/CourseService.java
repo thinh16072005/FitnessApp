@@ -11,7 +11,7 @@ import java.util.Scanner;
 public class CourseService {
     Scanner scanner = new Scanner(System.in);
 
-    public void add(Course course, String courseId) {
+    public void add(String courseId) {
         String courseName = Utils.getProperName("Enter course name: ");
         String description = Utils.getString("Enter description: ", scanner);
         String startDate = Utils.getValidDate("Enter start date: ");
@@ -46,10 +46,10 @@ public class CourseService {
 
     public void display() {
         ArrayList<String> courseList = new ArrayList<>();
-        System.out.printf("%-10s %-15s %-15s %-25s %-15s %-10s %-10s" , "CourseID", "Course Name", "Description", "Duration", "Start Date", "End Date", "Coach ID");
+        System.out.printf("%-10s %-15s %-15s %-25s %-15s %-10s %-10s%n" , "CourseID", "Course Name", "Description", "Duration", "Start Date", "End Date", "Coach ID");
         System.out.println("--------------------------------------------------------------------------------------");
         for (int i = 0; i < courseList.size(); i += 5) {
-            System.out.printf("%-10s %-15s %-15s %-25s %-15s%n", courseList.get(i), courseList.get(i + 1), courseList.get(i + 2), courseList.get(i + 3), courseList.get(i + 4), courseList.get(i + 5), courseList.get(i + 6));
+            System.out.printf("%-10s %-15s %-15s %-25s %-15s %-10s %-10s%n", courseList.get(i), courseList.get(i + 1), courseList.get(i + 2), courseList.get(i + 3), courseList.get(i + 4), courseList.get(i + 5), courseList.get(i + 6));
         }
     }
 

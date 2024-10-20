@@ -9,20 +9,20 @@ public class Subscription {
 
     public Subscription() {}
 
-    public Subscription(String subsciptionId, String learnerId, String courseId, String EnrollmentDate, char status) {
-        this.subscriptionId = subsciptionId;
+    public Subscription(String subscriptionId, String learnerId, String courseId, String EnrollmentDate, char status) {
+        this.subscriptionId = subscriptionId;
         this.learnerId = learnerId;
         this.courseId = courseId;
         this.EnrollmentDate = EnrollmentDate;
         this.status = status;
     }
 
-    public String getSubsciptionId() {
+    public String getSubscriptionId() {
         return subscriptionId;
     }
 
-    public void setSubsciptionId(String subsciptionId) {
-        this.subscriptionId = subsciptionId;
+    public void setSubscriptionId(String subscriptionId) {
+        this.subscriptionId = subscriptionId;
     }
 
     public String getLearnerId() {

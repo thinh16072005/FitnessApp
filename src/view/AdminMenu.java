@@ -19,7 +19,7 @@ public class AdminMenu {
             @Override
             public void execute(int ch) throws ClassNotFoundException {
                 switch (ch) {
-                    case 1 -> coachService.add(null);
+                    case 1 -> coachService.add();
                     case 2 -> coachService.update(null);
                     case 3 -> coachService.delete(null);
                     case 4 -> coachService.display();

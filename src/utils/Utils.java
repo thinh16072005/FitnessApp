@@ -1,5 +1,6 @@
 package utils;
 
+import java.io.Console;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -99,7 +100,7 @@ public class Utils {
 
     public static boolean getBoolean(String command, Scanner input) {
         boolean result;
-        System.out.print(command + " : ");
+        System.out.print(command + "");
         String i = input.nextLine();
         if (i.equalsIgnoreCase("true")) {
             result = true;
@@ -269,19 +270,22 @@ public class Utils {
         }
     }
 
-    public static int calculateAge(String dob) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        LocalDate dateOfBirth = LocalDate.parse(dob, formatter);
-        LocalDate currentDate = LocalDate.now();
-        return Period.between(dateOfBirth, currentDate).getYears();
+    public static String getPassword(String prompt) {
+        Console console = System.console();
+        if (console == null) {
+            System.out.println("No console available");
+            return Utils.getString(prompt, scanner);
+        }
+        char[] passwordArray = console.readPassword(prompt);
+        return new String(passwordArray);
     }
 
-    public static int calculateDuration(String startDate, String endDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        LocalDate start = LocalDate.parse(startDate, formatter);
-        LocalDate end = LocalDate.parse(endDate, formatter);
-        return (int) ChronoUnit.DAYS.between(start, end);
+    public static int calculateAge(LocalDate dob) {
+        return Period.between(dob, LocalDate.now()).getYears();
     }
 
+    public static int calculateDuration(LocalDate startDate, LocalDate endDate) {
+        return (int) ChronoUnit.DAYS.between(startDate, endDate);
+    }
 
 }

@@ -17,10 +17,26 @@ public class CoachRepo {
                 return rs.getInt(1) > 0;
             }
             else {
-                System.out.println("Coach ID does not exist!");
+                System.err.println("Coach ID does not exist!");
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean validateLogin(String coachId, String password) {
+        try {
+            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+            PreparedStatement prep = conn.prepareStatement("SELECT COUNT(*) FROM tblCoach WHERE CoachID = ? AND Password = ?");
+            prep.setString(1, coachId);
+            prep.setString(2, password);
+            ResultSet rs = prep.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("SQL Exception: " + e.getMessage());
         }
         return false;
     }
@@ -29,7 +45,7 @@ public class CoachRepo {
         Coach coach = null;
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT * FROM tblCoach WHERE CoachID = ?");
+            PreparedStatement prep = conn.prepareStatement("SELECT (CoachID, CoachFirstName, CoachLastName, CoachEmail, CoachPhone) FROM tblCoach WHERE CoachID = ?");
             prep.setString(1, coachId);
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {

@@ -13,6 +13,8 @@ public class Course {
     Date startDate;
     Date endDate;
 
+    public Course() {}
+
     public Course(String courseID, String courseName, String description, ArrayList<Workout> workoutList, Coach coach, int duration, Date startDate, Date endDate) {
         this.courseID = courseID;
         this.courseName = courseName;
@@ -62,6 +64,22 @@ public class Course {
 
     public void setCoach(Coach coach) {
         this.coach = coach;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 
     public int getDuration() {

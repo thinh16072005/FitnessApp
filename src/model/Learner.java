@@ -4,24 +4,24 @@ import java.util.Date;
 
 public class Learner {
     private String id;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String phoneNumber;
-    private Date dob; // Ngày sinh
-    private int age; // Tuổi
+    private String LearnerFirstName;
+    private String LearnerLastName;
+    private String LearnerEmail;
+    private String LearnerPhoneNumber;
+    private Date LearnerDob; // Ngày sinh
+    private int LearnerAge; // Tuổi
     private String gender; // Giới tính
 
     public Learner() {}
 
-    public Learner(String id, String firstName, String lastName, String email, String phoneNumber, Date dob, int age, String gender) {
+    public Learner(String id, String LearnerFirstName, String lastName, String email, String LearnerPhoneNumber, Date LearnerDob, int LearnerAge, String gender) {
         this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.dob = dob;
-        this.age = age;
+        this.LearnerFirstName = LearnerFirstName;
+        this.LearnerLastName = lastName;
+        this.LearnerEmail = email;
+        this.LearnerPhoneNumber = LearnerPhoneNumber;
+        this.LearnerDob = LearnerDob;
+        this.LearnerAge = LearnerAge;
         this.gender = gender;
     }
 
@@ -33,53 +33,52 @@ public class Learner {
         this.id = id;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getLearnerFirstName() {
+        return LearnerFirstName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setLearnerFirstName(String learnerFirstName) {
+        this.LearnerFirstName = learnerFirstName;
     }
 
     public String getLastName() {
-        return lastName;
+        return LearnerLastName;
     }
 
     public void setLastName(String lastName) {
-        this.lastName = lastName;
+        this.LearnerLastName = lastName;
     }
 
     public String getEmail() {
-        return email;
+        return LearnerEmail;
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.LearnerEmail = email;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getLearnerPhoneNumber() {
+        return LearnerPhoneNumber;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setLearnerPhoneNumber(String learnerPhoneNumber) {
+        this.LearnerPhoneNumber = learnerPhoneNumber;
     }
 
-    public Date getDob() {
-        return dob;
+    public Date getLearnerDob() {
+        return LearnerDob;
     }
 
-    public void setDob(Date dob) {
-        this.dob = dob;
+    public void setLearnerDob(Date learnerDob) {
+        this.LearnerDob = learnerDob;
     }
 
-    public int getAge() {
-        return age;
+    public int getLearnerAge() {
+        return LearnerAge;
     }
 
-    public void setAge(int age) {
-
-        this.age = age;
+    public void setLearnerAge(int learnerAge) {
+        this.LearnerAge = learnerAge;
     }
 
     public String getGender() {
@@ -88,5 +87,29 @@ public class Learner {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("""
+                         +-----------------+----------------------+
+                         | %-15s | %-20s |
+                         +-----------------+----------------------+
+                         | %-15s | %-20s |
+                         | %-15s | %-20s |
+                         | %-15s | %-20s |
+                         | %-15s | %-20s |
+                         | %-15s | %-20s |
+                         | %-15s | %-20s |
+                         +-----------------+----------------------+
+                         """,
+                "Learner ID", id,
+                "First Name", LearnerFirstName,
+                "Last Name", LearnerLastName,
+                "Email", LearnerEmail,
+                "Phone Number", LearnerPhoneNumber,
+                "Age", LearnerAge,
+                "Date of Birth", LearnerDob
+        );
     }
 }

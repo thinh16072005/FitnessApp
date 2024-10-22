@@ -1,6 +1,5 @@
 package repository;
 
-import model.Coach;
 import model.JDBC;
 import model.Learner;
 
@@ -17,11 +16,24 @@ public class LearnerRepo {
             if (rs.next()) {
                 return rs.getInt(1) > 0;
             }
-            else {
-                System.out.println("Learner ID does not exist!");
-            }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean validateLogin(String learnerId, String password) {
+        try {
+            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+            PreparedStatement prep = conn.prepareStatement("SELECT COUNT(*) FROM tblLearner WHERE LearnerID = ? AND Password = ?");
+            prep.setString(1, learnerId);
+            prep.setString(2, password);
+            ResultSet rs = prep.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("SQL Exception: " + e.getMessage());
         }
         return false;
     }
@@ -36,12 +48,12 @@ public class LearnerRepo {
             if (rs.next()) {
                 learner = new Learner();
                 learner.setId(rs.getString("LearnerID"));
-                learner.setFirstName(rs.getString("LearnerFirstName"));
+                learner.setLearnerFirstName(rs.getString("LearnerFirstName"));
                 learner.setLastName(rs.getString("LearnerLastName"));
                 learner.setEmail(rs.getString("LearnerEmail"));
-                learner.setPhoneNumber(rs.getString("LearnerPhone"));
-                learner.setDob(rs.getDate("LearnerDob"));
-                learner.setAge(rs.getInt("LearnerAge"));
+                learner.setLearnerPhoneNumber(rs.getString("LearnerPhone"));
+                learner.setLearnerDob(rs.getDate("LearnerDob"));
+                learner.setLearnerAge(rs.getInt("LearnerAge"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -59,10 +71,12 @@ public class LearnerRepo {
             ResultSet rs = prep.executeQuery();
             while (rs.next()) {
                 learnerList.add(rs.getString("LearnerID"));
-                learnerList.add(rs.getString("CoachFirstName"));
-                learnerList.add(rs.getString("CoachLastName"));
-                learnerList.add(rs.getString("CoachEmail"));
-                learnerList.add(rs.getString("CoachPhone"));
+                learnerList.add(rs.getString("LearnerFirstName"));
+                learnerList.add(rs.getString("LearnerLastName"));
+                learnerList.add(rs.getString("LearnerEmail"));
+                learnerList.add(rs.getString("LearnerPhone"));
+                learnerList.add(rs.getString("LearnerAge"));
+                learnerList.add(rs.getString("LearnerDob"));
             }
         } catch (SQLException e) {
             e.printStackTrace();

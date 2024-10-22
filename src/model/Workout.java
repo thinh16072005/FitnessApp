@@ -1,10 +1,5 @@
 package model;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 public class Workout {
     private String workoutID;
     private String workoutName;
@@ -12,16 +7,16 @@ public class Workout {
     private String nutrition;
     private double bmi;
     private double calories;
-    private String coachID;
+    private String courseId;
 
-    public Workout(String workoutID, String workoutName, String exercise, String nutrition, double bmi, double calories, String coachID) {
+    public Workout(String workoutID, String workoutName, String exercise, String nutrition, double bmi, double calories, String courseId) {
         this.workoutID = workoutID;
         this.workoutName = workoutName;
         this.exercise = exercise;
         this.nutrition = nutrition;
         this.bmi = bmi;
         this.calories = calories;
-        this.coachID = coachID;
+        this.courseId = courseId;
     }
 
     public String getWorkoutID() {
@@ -72,11 +67,11 @@ public class Workout {
         this.calories = calories;
     }
 
-    public String getCoachID() {
-        return coachID;
+    public String getCourseId() {
+        return courseId;
     }
 
-    public void setCoachID(String coachID) {
-        this.coachID = coachID;
+    public void setCourseId(String courseId) {
+        this.courseId = courseId;
     }
 }

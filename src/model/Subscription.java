@@ -1,15 +1,22 @@
 package model;
 
+import repository.SubscriptionRepo;
+
+import java.time.LocalDate;
+import java.util.Date;
+
 public class Subscription {
     private String subscriptionId;
     private String learnerId;
     private String courseId;
-    private String EnrollmentDate;
-    private char status;
+    private LocalDate EnrollmentDate;
+    private String status;
+
+    Course course = new Course();
 
     public Subscription() {}
 
-    public Subscription(String subscriptionId, String learnerId, String courseId, String EnrollmentDate, char status) {
+    public Subscription(String subscriptionId, String learnerId, String courseId, LocalDate EnrollmentDate, String status) {
         this.subscriptionId = subscriptionId;
         this.learnerId = learnerId;
         this.courseId = courseId;
@@ -41,19 +48,35 @@ public class Subscription {
         this.courseId = courseId;
     }
 
-    public String getEnrollmentDate() {
+    public LocalDate getEnrollmentDate() {
         return EnrollmentDate;
     }
 
-    public void setEnrollmentDate(String enrollmentDate) {
-        EnrollmentDate = enrollmentDate;
+    public void setEnrollmentDate(LocalDate enrollmentDate) {
+        this.EnrollmentDate = enrollmentDate;
     }
 
-    public char getStatus() {
-        return status;
-    }
+//    public String getStatus() {
+//        LocalDate enrollmentDate = getEnrollmentDate();
+//        LocalDate startDate = course.getStartDate().toLocalDate();
+//        LocalDate endDate = course.getEndDate().toLocalDate();
+//        LocalDate currentDate = LocalDate.now();
+//
+//        if (enrollmentDate.isBefore(startDate)) {
+//            return "Inactive";
+//        } else if (enrollmentDate.equals(startDate)) {
+//            return "Active";
+//        } else if (currentDate.isAfter(endDate)) {
+//            return "Expired";
+//        } else if (currentDate.equals(endDate)) {
+//            return "Completed";
+//        } else {
+//            return "Active";
+//        }
+//        return status;
+//    }
 
-    public void setStatus(char status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 }

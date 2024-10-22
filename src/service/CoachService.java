@@ -43,38 +43,41 @@ public class CoachService {
     public void update(Coach coach) throws ClassNotFoundException {
         String id = Utils.getString("Enter coach ID: ", scanner);
         try {
-            if (!coachRepo.checkCoachIdExist(id)) {
-                System.out.println("Coach ID does not exist!");
-                return;
-            }
-            System.out.println("Coach found:");
+            System.out.println("Learner found:");
             coach = coachRepo.findCoachById(id);
             System.out.println(coach);
 
-            Class<?> customerFields = Class.forName("model.Coach");
+            Class<?> learnerFields = Class.forName("model.Coach");
 
-            Field[] fields = customerFields.getSuperclass().getDeclaredFields();
+            Field[] fields = learnerFields.getDeclaredFields();
             for (Field field : fields) {
-                System.out.print("\t" + field.getName());
+                System.out.print(field.getName() + "\t");
             }
 
             String attribute = Utils.getString("\nEnter attribute to update: ", scanner);
-            switch (attribute.toLowerCase()) {
-                case "firstname" -> coach.setCoachFirstName(Utils.getProperName("Enter new first name: "));
-                case "lastname" -> coach.setCoachLastName(Utils.getProperName("Enter new last name: "));
-                case "email" -> coach.setCoachEmail(Utils.getValidEmail("Enter new email: "));
-                case "phonenumber" -> coach.setCoachPhoneNumber(Utils.getPhoneNumber("Enter new phone number: "));
-                default -> {
-                    System.out.println("Invalid attribute.");
-                    return;
-                }
+            String newValue = Utils.getString("Enter new value: ", scanner);
+
+            try {
+                Field field = coach.getClass().getDeclaredField(attribute);
+                field.setAccessible(true);
+                field.set(coach, newValue);
+
+                Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+                PreparedStatement preparedStatement = conn.prepareStatement("UPDATE tblCoach SET " + attribute + " = ? WHERE LearnerID = ?");
+                preparedStatement.setString(1, newValue);
+                preparedStatement.setString(2, id);
+                preparedStatement.executeUpdate();
+                System.out.println("Coach updated");
+            } catch (NoSuchFieldException | IllegalAccessException | SQLException e) {
+                System.err.println("Exception: " + e.getMessage());
             }
-        } catch (Exception ex) {
-            System.out.println("Error updating coach: " + ex.getMessage());
+        }
+        catch (Exception e) {
+            System.err.println("Exception: " + e.getMessage());
         }
     }
 
-    public void delete(Coach coach) {
+    public void delete() {
         String id = Utils.getString("Enter coach ID: ", scanner);
         if (coachRepo.checkCoachIdExist(id)) {
             try {
@@ -94,7 +97,6 @@ public class CoachService {
 
     public void display() {
         ArrayList<String> coachList = coachRepo.getCoachList();
-//        coachList.clear();
         System.out.printf("%-10s %-15s %-15s %-25s %-15s%n", "CoachID", "First Name", "Last Name", "Email", "Phone Number");
         System.out.println("--------------------------------------------------------------------------------------");
         for (int i = 0; i < coachList.size(); i += 5) {

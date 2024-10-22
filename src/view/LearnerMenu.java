@@ -1,41 +1,37 @@
 package view;
 
-import model.JDBC;
+import repository.LearnerRepo;
+import service.LearnerService;
+import service.SubscriptionService;
 import utils.Utils;
 
-import java.sql.*;
 import java.util.Scanner;
 
 public class LearnerMenu {
-    public static String[] learnerOptions = {"View course", "Register course", "Delete course"};
-    Scanner input = new Scanner(System.in);
-
-    private boolean checkLearnerIdExist() {
-        String learnerId = Utils.getString("Enter Learner ID", input);
-        try {
-            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT COUNT(*) FROM tblLearner WHERE LearnerID = ?");
-            prep.setString(1, learnerId);
-            ResultSet rs = prep.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-            else {
-                System.out.println("Learner ID does not exist!");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
+    public static String[] learnerOptions = {"View course", "Enroll a course", "Unenroll a course", "Change password", "Logout"};
+    static Scanner input = new Scanner(System.in);
 
     public static void displayLearnerMenu() throws ClassNotFoundException {
-//        checkLearnerIdExist();
-        Menu coachMenu = new Menu("\nHELLO, COACH", learnerOptions) {
+        SubscriptionService subscriptionService = new SubscriptionService();
+        LearnerRepo learnerRepo = new LearnerRepo();
+        LearnerService learnerService = new LearnerService();
+
+        String learnerId = Utils.getString("Enter learner ID: ", input);
+        String password = Utils.getPassword("Enter password: ");
+
+        if (!learnerRepo.validateLogin(learnerId, password)) {
+            System.err.println("Invalid login credentials");
+            return;
+        }
+
+        Menu<String> coachMenu = new Menu<>("\nHELLO, LEARNER " + learnerId, learnerOptions) {
             @Override
             public void execute(int ch) {
                 switch (ch) {
-
+                    case 1 -> subscriptionService.display();
+                    case 2 -> subscriptionService.register(learnerId);
+                    case 3 -> subscriptionService.unenroll();
+                    case 4 -> learnerService.updatePassword(learnerId);
                 }
             }
         };

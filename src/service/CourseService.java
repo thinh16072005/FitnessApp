@@ -44,13 +44,28 @@ public class CourseService {
         if (!courseRepo.checkCourseIdExist(courseId)) {
             System.out.println("Course ID does not exist!");
             return;
+        } else {
+            String confirm = Utils.getString("Are you sure? (Y/N): ", scanner);
+            if (!confirm.equalsIgnoreCase("Y")) {
+                System.out.println("Course not deleted");
+                return;
+            } else {
+                try {
+                    Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+                    PreparedStatement prep = conn.prepareStatement("DELETE FROM tblCourse WHERE CourseID = ?");
+                    prep.setString(1, courseId);
+                    prep.executeUpdate();
+                } catch (SQLException e) {
+                    System.err.println("SQL Exception: " + e.getMessage());
+                }
+            }
         }
         System.out.println("Course deleted");
     }
 
     public void display() {
         ArrayList<String> courseList = courseRepo.getCourseList();
-        System.out.printf("%-10s %-30s %-15s %-25s %-15s %-10s %-10s%n" , "CourseID", "Course Name", "Description", "Duration", "Start Date", "End Date", "Coach ID");
+        System.out.printf("%-10s %-30s %-15s %-25s %-15s %-10s %-10s%n", "CourseID", "Course Name", "Description", "Duration (days)", "Start Date", "End Date", "Coach ID");
         System.out.println("-----------------------------------------------------------------------------------------------");
         for (int i = 0; i < courseList.size(); i += 7) {
             System.out.printf("%-10s %-30s %-15s %-25s %-15s %-10s %-10s%n", courseList.get(i), courseList.get(i + 1), courseList.get(i + 2), courseList.get(i + 3), courseList.get(i + 4), courseList.get(i + 5), courseList.get(i + 6));

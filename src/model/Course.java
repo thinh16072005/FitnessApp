@@ -1,26 +1,21 @@
 package model;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 public class Course {
     String courseID;
     String courseName;
     String description;
-    ArrayList<Workout> workoutList;
-    Coach coach;
     int duration;
     Date startDate;
     Date endDate;
 
     public Course() {}
 
-    public Course(String courseID, String courseName, String description, ArrayList<Workout> workoutList, Coach coach, int duration, Date startDate, Date endDate) {
+    public Course(String courseID, String courseName, String description, int duration, Date startDate, Date endDate) {
         this.courseID = courseID;
         this.courseName = courseName;
         this.description = description;
-        this.workoutList = workoutList;
-        this.coach = coach;
         this.duration = duration;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -57,14 +52,6 @@ public class Course {
 //    public void setWorkout(Workout workout) {
 //        this.workout = workout;
 //    }
-
-    public Coach getCoach() {
-        return coach;
-    }
-
-    public void setCoach(Coach coach) {
-        this.coach = coach;
-    }
 
     public Date getStartDate() {
         return startDate;

@@ -19,7 +19,7 @@ public class CoachMenu {
         WorkoutService workoutService = new WorkoutService();
 
         String coachId = Utils.getString("Enter coach ID: ", input);
-        String password = Utils.getPassword("Enter password: ");
+        String password = Utils.getProperPassword("Enter password: ");
 
         if (!coachRepo.validateLogin(coachId, password)) {
             System.out.println("Invalid login credentials");

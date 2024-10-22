@@ -1,7 +1,6 @@
 package service;
 
 import model.JDBC;
-import model.Subscription;
 import repository.CourseRepo;
 import repository.SubscriptionRepo;
 import utils.Utils;
@@ -49,11 +48,19 @@ public class SubscriptionService {
         }
         else {
             try {
-                Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-                PreparedStatement prep = conn.prepareStatement("UPDATE tblSubscription SET Status = 'Inactive' WHERE SubscriptionID = ?");
-                prep.setString(1, subscriptionId);
-                prep.executeUpdate();
-                System.out.println("Subscription deleted");
+                String confirm = Utils.getString("Are you sure? (Y/N): ", input);
+                if (!confirm.equalsIgnoreCase("Y")) {
+                    System.out.println("Subscription not deleted");
+                    return;
+                }
+                else {
+                    Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+                    PreparedStatement prep = conn.prepareStatement("DELETE FROM tblSubscription WHERE SubscriptionID = ?");
+                    prep.setString(1, subscriptionId);
+                    prep.executeUpdate();
+                    System.out.println("You have unenrolled from the course");
+                }
+
             } catch (SQLException e) {
                 System.err.println("SQL Exception: " + e.getMessage());
             }

@@ -3,6 +3,7 @@ package service;
 import model.Coach;
 import model.JDBC;
 import repository.CoachRepo;
+import utils.PasswordEncryption;
 import utils.Utils;
 
 import java.lang.reflect.Field;
@@ -15,6 +16,7 @@ public class CoachService {
     CoachRepo coachRepo = new CoachRepo();
 
     public void add() {
+        String password = PasswordEncryption.hashPassword((Utils.getProperPassword("Enter password: ")));
         String coachFirstName = Utils.getProperName("Enter coach's first name: ");
         String coachLastName = Utils.getProperName("Enter coach's last name: ");
         String coachEmail = Utils.getValidEmail("Enter coach's email: ");
@@ -23,12 +25,13 @@ public class CoachService {
         if (confirm.equalsIgnoreCase("Y")) {
             try {
                 Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-                PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO tblCoach VALUES (?, ?, ?, ?, ?)");
+                PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO tblCoach (CoachID, CoachFirstName, CoachLastName, CoachEmail, CoachPhone, Password) VALUES (?, ?, ?, ?, ?, ?)");
                 preparedStatement.setString(1, autoGenerateCoachID(conn));
                 preparedStatement.setString(2, coachFirstName);
                 preparedStatement.setString(3, coachLastName);
                 preparedStatement.setString(4, coachEmail);
                 preparedStatement.setString(5, coachPhoneNumber);
+                preparedStatement.setString(6, password);
                 preparedStatement.executeUpdate();
                 System.out.println("Coach added");
             } catch (SQLException e) {
@@ -40,11 +43,11 @@ public class CoachService {
         }
     }
 
-    public void update(Coach coach) throws ClassNotFoundException {
+    public void update() {
         String id = Utils.getString("Enter coach ID: ", scanner);
         try {
             System.out.println("Learner found:");
-            coach = coachRepo.findCoachById(id);
+            Coach coach = coachRepo.findCoachById(id);
             System.out.println(coach);
 
             Class<?> learnerFields = Class.forName("model.Coach");

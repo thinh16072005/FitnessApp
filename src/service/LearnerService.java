@@ -3,6 +3,7 @@ package service;
 import model.JDBC;
 import model.Learner;
 import repository.LearnerRepo;
+import utils.PasswordEncryption;
 import utils.Utils;
 
 import java.lang.reflect.Field;
@@ -17,23 +18,25 @@ public class LearnerService {
     LearnerRepo learnerRepo = new LearnerRepo();
 
     public void add() {
+        String password = PasswordEncryption.hashPassword((Utils.getProperPassword("Enter password: ")));
         String firstName = Utils.getProperName("Enter first name: ");
         String lastName = Utils.getProperName("Enter last name: ");
         String email = Utils.getValidEmail("Enter email: ");
         String phoneNumber = Utils.getPhoneNumber("Enter phone number: ");
         LocalDate dob = LocalDate.parse(Utils.getString("Enter DOB (dd/MM/yyyy): ", scanner), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        int age = Utils.calculateAge(dob);
-        boolean confirm = Utils.getBoolean("Is this information correct? (Y/N): ", scanner);
-        if (confirm) {
+
+        String confirm = Utils.getString("Is this information correct? (Y/N): ", scanner);
+        if (confirm.equalsIgnoreCase("Y")) {
             try {
                 Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-                PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO tblLearner(LearnerID, LearnerFirstName, LearnerLastName, LearnerEmail, LearnerPhone, LearnerDob) VALUES (?, ?, ?, ?, ?, ?)");
+                PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO tblLearner(LearnerID, LearnerFirstName, LearnerLastName, LearnerEmail, LearnerPhone, LearnerDob, Password) VALUES (?, ?, ?, ?, ?, ?, ?)");
                 preparedStatement.setString(1, autoGenerateLearnerID(conn));
                 preparedStatement.setString(2, firstName);
                 preparedStatement.setString(3, lastName);
                 preparedStatement.setString(4, email);
                 preparedStatement.setString(5, phoneNumber);
                 preparedStatement.setDate(6, Date.valueOf(dob));
+                preparedStatement.setString(7, password);
                 preparedStatement.executeUpdate();
                 System.out.println("Learner added");
             } catch (SQLException e) {
@@ -44,11 +47,11 @@ public class LearnerService {
         }
     }
 
-    public void update(Learner learner) throws ClassNotFoundException {
+    public void update() {
         String id = Utils.getString("Enter learner ID: ", scanner);
         try {
             System.out.println("Learner found:");
-            learner = learnerRepo.findLearnerById(id);
+            Learner learner = learnerRepo.findLearnerById(id);
             System.out.println(learner);
 
             Class<?> learnerFields = Class.forName("model.Learner");
@@ -82,7 +85,7 @@ public class LearnerService {
     }
 
     public void updatePassword(String id) {
-        String newPassword = Utils.getPassword("Enter new password: ");
+        String newPassword = Utils.getProperPassword("Enter new password: ");
         if (learnerRepo.checkLearnerIdExist(id)) {
             try {
                 Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
@@ -97,15 +100,22 @@ public class LearnerService {
         }
     }
 
-    public void delete(Learner learner) {
+    public void delete() {
         String id = Utils.getString("Enter learner ID: ", scanner);
         if (learnerRepo.checkLearnerIdExist(id)) {
             try {
-                Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-                PreparedStatement preparedStatement = conn.prepareStatement("DELETE FROM tblLearner WHERE LearnerID = ?");
-                preparedStatement.setString(1, id);
-                preparedStatement.executeUpdate();
-                System.out.println("Learner deleted");
+                String confirm = Utils.getString("Are you sure? (Y/N): ", scanner);
+                if (!confirm.equalsIgnoreCase("Y")) {
+                    System.out.println("Learner not deleted");
+                    return;
+                }
+                else {
+                    Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+                    PreparedStatement preparedStatement = conn.prepareStatement("DELETE FROM tblLearner WHERE LearnerID = ?");
+                    preparedStatement.setString(1, id);
+                    preparedStatement.executeUpdate();
+                    System.out.println("Learner deleted");
+                }
             } catch (SQLException e) {
                 System.err.println("SQL Exception: " + e.getMessage());
             }

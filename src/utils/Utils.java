@@ -20,6 +20,30 @@ public class Utils {
         return input.nextLine().trim();
     }
 
+    public static String getExerciseId(String command, Scanner input) {
+        Pattern regex = Pattern.compile("EX\\d{3}"); // Must start with EX and be followed by 3 digits
+        while (true) {
+            String exerciseId = getString(command, input);
+            if (regex.matcher(exerciseId).matches()) {
+                return exerciseId;
+            } else {
+                System.out.println("Invalid input. Exercise ID must start with EX and be followed by 3 digits.");
+            }
+        }
+    }
+
+    public static String getWorkoutId(String command, Scanner input) {
+        Pattern regex = Pattern.compile("W\\d{3}"); // Must start with W and be followed by 3 digits
+        while (true) {
+            String workoutId = getString(command, input);
+            if (regex.matcher(workoutId).matches()) {
+                return workoutId;
+            } else {
+                System.out.println("Invalid input. Workout ID must start with W and be followed by 3 digits.");
+            }
+        }
+    }
+
     public static int getInt(String command, Scanner input) {
         int i = 0;
         boolean validInput = false;
@@ -270,14 +294,43 @@ public class Utils {
         }
     }
 
-    public static String getPassword(String prompt) {
-        Console console = System.console();
-        if (console == null) {
-            System.out.println("No console available");
-            return Utils.getString(prompt, scanner);
+    public static String getProperPassword(String prompt) {
+        Scanner scanner = new Scanner(System.in);
+        String password;
+
+        while (true) {
+            System.out.print("Enter a valid password: ");
+            password = scanner.nextLine();
+
+            // Check if the password is at least 8 characters long
+            if (password.length() < 8) {
+                System.out.println("Password must be at least 8 characters long.");
+                continue;
+            }
+
+            // Check if the password contains at least one capitalized letter
+            if (!password.matches(".*[A-Z].*")) {
+                System.out.println("Password must contain at least 1 capitalized letter.");
+                continue;
+            }
+
+            // Check if the password contains at least one special character
+            if (!password.matches(".*[,:./~!@#$%^&*\\-_?].*")) {
+                System.out.println("Password must contain at least 1 special character: , . / ~ ! @ # $ % ^ & * - _ ?");
+                continue;
+            }
+
+            // Check if the password contains at least one number
+            if (!password.matches(".*[0-9].*")) {
+                System.out.println("Password must contain at least 1 number.");
+                continue;
+            }
+
+            // If all checks passed, break the loop and return the password
+            break;
         }
-        char[] passwordArray = console.readPassword(prompt);
-        return new String(passwordArray);
+
+        return password;
     }
 
     public static int calculateAge(LocalDate dob) {

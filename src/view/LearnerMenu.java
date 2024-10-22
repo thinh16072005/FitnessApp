@@ -17,7 +17,7 @@ public class LearnerMenu {
         LearnerService learnerService = new LearnerService();
 
         String learnerId = Utils.getString("Enter learner ID: ", input);
-        String password = Utils.getPassword("Enter password: ");
+        String password = Utils.getProperPassword("Enter password: ");
 
         if (!learnerRepo.validateLogin(learnerId, password)) {
             System.err.println("Invalid login credentials");

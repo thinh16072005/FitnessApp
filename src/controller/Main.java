@@ -6,7 +6,7 @@ import view.LearnerMenu;
 import view.Menu;
 
 public class Main extends Menu<String>{
-    static String[] mainMenu = {"Coach", "Learner", "Admin"};
+    static String[] mainMenu = {"Coach", "Learner", "Admin", "Exit"};
 
     public Main(String title, String[] options) {
         super(title, options);

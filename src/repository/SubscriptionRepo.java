@@ -12,8 +12,6 @@ import java.util.PriorityQueue;
 import java.util.Comparator;
 
 public class SubscriptionRepo {
-    Course course = new Course();
-    Subscription subscription = new Subscription();
 
     public boolean checkSubscriptionIdExist(String subscriptionId) {
         try {
@@ -49,5 +47,49 @@ public class SubscriptionRepo {
             e.printStackTrace();
         }
         return subscriptionList;
+    }
+
+    public String getCourseName(String subscriptionId) {
+        String courseName = "";
+        try {
+            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+
+            // Query to get the course name using the subscription ID
+            PreparedStatement prep = conn.prepareStatement(
+                    "SELECT tblCourse.CourseName " +
+                            "FROM tblCourse " +
+                            "JOIN tblSubscription ON tblCourse.CourseID = tblSubscription.CourseID " +
+                            "WHERE tblSubscription.SubscriptionID = ?");
+
+            // Set the subscriptionId parameter in the query
+            prep.setString(1, subscriptionId);
+
+            // Execute the query and retrieve the result
+            ResultSet rs = prep.executeQuery();
+            if (rs.next()) {
+                courseName = rs.getString("CourseName");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return courseName;
+    }
+
+    public String getSubscriptionId(String learnerId, String courseId) {
+        String subscriptionId = null;
+        try {
+            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+            PreparedStatement prep = conn.prepareStatement("SELECT SubscriptionID FROM tblSubscription WHERE LearnerID = ? AND CourseID = ?");
+            prep.setString(1, learnerId);
+            prep.setString(2, courseId);
+            ResultSet rs = prep.executeQuery();
+            if (rs.next()) {
+                subscriptionId = rs.getString("SubscriptionID");
+            }
+        } catch (SQLException e) {
+            System.err.println("SQL Exception: " + e.getMessage());
+        }
+        return subscriptionId;
     }
 }

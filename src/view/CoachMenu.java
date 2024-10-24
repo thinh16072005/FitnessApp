@@ -1,22 +1,27 @@
 package view;
 
 import repository.CoachRepo;
-import service.CourseService;
-import service.WorkoutService;
+import service.CoachService;
 import utils.Utils;
 
 import java.util.Scanner;
 
 public class CoachMenu {
     public static String[] coachOptions = {
-            "Add new course", "Update course", "Delete course", "Display courses", "Display learners of a course",
-            "Add workout to course", "Update workout", "Delete workout", "Display workouts", "Exit"};
+            "Course Management",
+            "Workout Management",
+            "Exercise Management",
+            "View profile",
+            "Update profile",
+            "Change password",
+            "Exit"
+            };
     static Scanner input = new Scanner(System.in);
 
     public static void displayCoachMenu() throws ClassNotFoundException {
-        CourseService courseService = new CourseService();
         CoachRepo coachRepo = new CoachRepo();
-        WorkoutService workoutService = new WorkoutService();
+        CoachSubMenus coachSubMenus = new CoachSubMenus();
+        CoachService coachService = new CoachService();
 
         String coachId = Utils.getString("Enter coach ID: ", input);
         String password = Utils.getProperPassword("Enter password: ");
@@ -29,15 +34,13 @@ public class CoachMenu {
             @Override
             public void execute(int ch) throws ClassNotFoundException {
                 switch (ch) {
-                    case 1 -> courseService.add(coachId);
-                    case 2 -> courseService.update();
-                    case 3 -> courseService.delete();
-                    case 4 -> courseService.display();
-                    case 5 -> courseService.displayLearners();
-                    case 6 -> workoutService.add();
-                    case 7 -> workoutService.update(null);
-                    case 8 -> workoutService.delete();
-                    case 9 -> workoutService.display();
+                    case 1 -> coachSubMenus.displayCourseMenu(coachId);
+                    case 2 -> coachSubMenus.displayWorkoutMenu();
+                    case 3 -> coachSubMenus.displayExerciseMenu();
+                    case 4 -> coachService.viewProfile(coachId);
+                    case 5 -> coachService.update(coachId);
+                    case 6 -> coachService.updatePassword(coachId);
+                    case 7 -> {}
                 }
             }
         };

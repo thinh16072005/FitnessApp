@@ -9,6 +9,7 @@ public class Course {
     int duration;
     Date startDate;
     Date endDate;
+    String coachID;
 
     public Course() {}
 
@@ -77,4 +78,34 @@ public class Course {
         this.duration = duration;
     }
 
+    public String getCoachID() {
+        return coachID;
+    }
+
+    public void setCoachID(String coachID) {
+        this.coachID = coachID;
+    }
+
+
+    @Override
+    public String toString() {
+        return String.format("""
+                         +-----------------+----------------------+
+                         | %-15s | %-20s |
+                         +-----------------+----------------------+
+                         | %-15s | %-20s |
+                         | %-15s | %-20s |
+                         | %-15s | %-20d |
+                         | %-15s | %-20s |
+                         | %-15s | %-20s |
+                         +-----------------+----------------------+
+                         """,
+                "Course ID", courseID,
+                "Name", courseName,
+                "Description", description,
+                "Duration", duration,
+                "Start", startDate,
+                "End", endDate
+        );
+    }
 }

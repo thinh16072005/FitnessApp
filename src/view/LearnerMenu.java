@@ -1,6 +1,7 @@
 package view;
 
 import repository.LearnerRepo;
+import repository.SubscriptionRepo;
 import service.LearnerService;
 import service.SubscriptionService;
 import utils.Utils;
@@ -8,11 +9,20 @@ import utils.Utils;
 import java.util.Scanner;
 
 public class LearnerMenu {
-    public static String[] learnerOptions = {"View course", "Enroll a course", "Unenroll a course", "Change password", "Logout"};
+    public static String[] learnerOptions = {
+            "View weekly schedule",
+            "Enroll a course",
+            "Unenroll a course",
+            "View profile",
+            "Update profile",
+            "Change password",
+            "Logout"
+    };
     static Scanner input = new Scanner(System.in);
 
     public static void displayLearnerMenu() throws ClassNotFoundException {
         SubscriptionService subscriptionService = new SubscriptionService();
+        SubscriptionRepo subscriptionRepo = new SubscriptionRepo();
         LearnerRepo learnerRepo = new LearnerRepo();
         LearnerService learnerService = new LearnerService();
 
@@ -28,10 +38,15 @@ public class LearnerMenu {
             @Override
             public void execute(int ch) {
                 switch (ch) {
-                    case 1 -> subscriptionService.display();
+                    case 1 -> {
+                        String courseId = Utils.getString("Enter course ID: ", input);
+                        subscriptionService.viewWeeklySubscription(learnerId, subscriptionRepo.getCourseName(subscriptionRepo.getSubscriptionId(learnerId, courseId)));
+                    }
                     case 2 -> subscriptionService.register(learnerId);
                     case 3 -> subscriptionService.unenroll();
-                    case 4 -> learnerService.updatePassword(learnerId);
+                    case 4 -> learnerService.viewProfile(learnerId);
+                    case 5 -> learnerService.update(learnerId);
+                    case 6 -> learnerService.updatePassword(learnerId);
                 }
             }
         };

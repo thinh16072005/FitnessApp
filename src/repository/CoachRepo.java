@@ -2,6 +2,7 @@ package repository;
 
 import model.Coach;
 import model.JDBC;
+import utils.PasswordEncryption;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -27,10 +28,11 @@ public class CoachRepo {
 
     public boolean validateLogin(String coachId, String password) {
         try {
+            String hashedPassword = PasswordEncryption.hashPassword(password);
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
             PreparedStatement prep = conn.prepareStatement("SELECT COUNT(*) FROM tblCoach WHERE CoachID = ? AND Password = ?");
             prep.setString(1, coachId);
-            prep.setString(2, password);
+            prep.setString(2, hashedPassword);
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1) > 0;
@@ -45,7 +47,7 @@ public class CoachRepo {
         Coach coach = null;
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT (CoachID, CoachFirstName, CoachLastName, CoachEmail, CoachPhone) FROM tblCoach WHERE CoachID = ?");
+            PreparedStatement prep = conn.prepareStatement("SELECT CoachID, CoachFirstName, CoachLastName, CoachEmail, CoachPhone FROM tblCoach WHERE CoachID = ?");
             prep.setString(1, coachId);
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {

@@ -9,6 +9,7 @@ public class Exercise {
     double caloriesBurn;
     String note;
     Duration duration;
+    String workoutId;
 
     public Exercise() {}
 
@@ -69,10 +70,17 @@ public class Exercise {
         this.duration = duration;
     }
 
+    public String getWorkoutId() {
+        return workoutId;
+    }
+
+    public void setWorkoutId(String workoutId) {
+        this.workoutId = workoutId;
+    }
+
     @Override
     public String toString() {
         return String.format("""
-                        | %-15s | %-20s |
                         +-----------------+----------------------+
                         | %-15s | %-20s |
                         +-----------------+----------------------+
@@ -83,13 +91,12 @@ public class Exercise {
                         | %-15s | %-20s |
                         +-----------------+----------------------+
                         """,
-                "Field", "Value",
-                "Exercise name", getExerciseName(),
-                "Number of sets", getSets(),
-                "Number of reps", getReps(),
-                "Number of calories", getCaloriesBurn(),
-                "Duration of exercise", getDuration(),
-                "Note for excercise", getNote()
+                "Name", getExerciseName(),
+                "sets", getSets(),
+                "reps", getReps(),
+                "calories", getCaloriesBurn(),
+                "Duration", getDuration(),
+                "Note", getNote()
         );
                 
     }

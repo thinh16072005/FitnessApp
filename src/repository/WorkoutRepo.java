@@ -1,6 +1,7 @@
 package repository;
 
 import model.JDBC;
+import model.Workout;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -25,19 +26,44 @@ public class WorkoutRepo {
         return workoutList;
     }
 
-    public boolean validateLogin(String username, String password) {
+    public boolean checkWorkoutIdExist(String workoutId) {
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT COUNT(*) FROM tblAdmin WHERE Username = ? AND Password = ?");
-            prep.setString(1, username);
-            prep.setString(2, password);
+            PreparedStatement prep = conn.prepareStatement("SELECT COUNT(*) FROM tblWorkout WHERE WorkoutID = ?");
+            prep.setString(1, workoutId);
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1) > 0;
             }
+            else {
+                System.err.println("Workout ID does not exist!");
+            }
         } catch (SQLException e) {
-            System.err.println("SQL Exception: " + e.getMessage());
+            e.printStackTrace();
         }
         return false;
+    }
+
+    public Workout findWorkoutById(String workoutId) {
+        Workout workout = null;
+        try {
+            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+            PreparedStatement prep = conn.prepareStatement("SELECT * FROM tblWorkout WHERE WorkoutID = ?");
+            prep.setString(1, workoutId);
+            ResultSet rs = prep.executeQuery();
+            if (rs.next()) {
+                workout = new Workout();
+                workout.setWorkoutID(rs.getString("WorkoutID"));
+                workout.setWorkoutName(rs.getString("WorkoutName"));
+                workout.setCourseId(rs.getString("CourseID"));
+            }
+            else {
+
+                System.err.println("Workout ID does not exist!");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return workout;
     }
 }

@@ -1,26 +1,25 @@
 package model;
 
-import repository.SubscriptionRepo;
-
 import java.time.LocalDate;
-import java.util.Date;
 
 public class Subscription {
     private String subscriptionId;
     private String learnerId;
     private String courseId;
     private LocalDate EnrollmentDate;
+    private String platform;
     private String status;
 
     Course course = new Course();
 
     public Subscription() {}
 
-    public Subscription(String subscriptionId, String learnerId, String courseId, LocalDate EnrollmentDate, String status) {
+    public Subscription(String subscriptionId, String learnerId, String courseId, LocalDate EnrollmentDate, String platform, String status) {
         this.subscriptionId = subscriptionId;
         this.learnerId = learnerId;
         this.courseId = courseId;
         this.EnrollmentDate = EnrollmentDate;
+        this.platform = platform;
         this.status = status;
     }
 
@@ -56,27 +55,43 @@ public class Subscription {
         this.EnrollmentDate = enrollmentDate;
     }
 
-//    public String getStatus() {
-//        LocalDate enrollmentDate = getEnrollmentDate();
-//        LocalDate startDate = course.getStartDate().toLocalDate();
-//        LocalDate endDate = course.getEndDate().toLocalDate();
-//        LocalDate currentDate = LocalDate.now();
-//
-//        if (enrollmentDate.isBefore(startDate)) {
-//            return "Inactive";
-//        } else if (enrollmentDate.equals(startDate)) {
-//            return "Active";
-//        } else if (currentDate.isAfter(endDate)) {
-//            return "Expired";
-//        } else if (currentDate.equals(endDate)) {
-//            return "Completed";
-//        } else {
-//            return "Active";
-//        }
-//        return status;
-//    }
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        if (platform.equalsIgnoreCase("online") || platform.equalsIgnoreCase("offline")) {
+            this.platform = platform;
+        } else {
+            throw new IllegalArgumentException("Platform must be either 'online' or 'offline'");
+        }
+    }
+
+    public String getStatus() {
+        return status;
+    }
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("""
+                         +-----------------+----------------------+
+                         | %-15s | %-20s |
+                         +-----------------+----------------------+
+                         | %-15s | %-20s |
+                         | %-15s | %-20s |
+                         | %-15s | %-20s |
+                         | %-15s | %-20s |
+                         +-----------------+----------------------+
+                         """,
+                "Subscription ID", subscriptionId,
+                "Learner ID", learnerId,
+                "Course ID", courseId,
+                "Enrollment Date", EnrollmentDate,
+                "Status", status
+        );
     }
 }

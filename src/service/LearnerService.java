@@ -47,8 +47,13 @@ public class LearnerService {
         }
     }
 
-    public void update() {
-        String id = Utils.getString("Enter learner ID: ", scanner);
+    public void viewProfile(String learnerId) {
+        System.out.println("Learner found:");
+        Learner learner = learnerRepo.findLearnerById(learnerId);
+        System.out.println(learner);
+    }
+
+    public void update(String id) {
         try {
             System.out.println("Learner found:");
             Learner learner = learnerRepo.findLearnerById(id);
@@ -65,17 +70,13 @@ public class LearnerService {
             String newValue = Utils.getString("Enter new value: ", scanner);
 
             try {
-                Field field = learner.getClass().getDeclaredField(attribute);
-                field.setAccessible(true);
-                field.set(learner, newValue);
-
                 Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
                 PreparedStatement preparedStatement = conn.prepareStatement("UPDATE tblLearner SET " + attribute + " = ? WHERE LearnerID = ?");
                 preparedStatement.setString(1, newValue);
                 preparedStatement.setString(2, id);
                 preparedStatement.executeUpdate();
                 System.out.println("Learner updated");
-            } catch (NoSuchFieldException | IllegalAccessException | SQLException e) {
+            } catch (SQLException e) {
                 System.err.println("Exception: " + e.getMessage());
             }
         }
@@ -85,8 +86,10 @@ public class LearnerService {
     }
 
     public void updatePassword(String id) {
-        String newPassword = Utils.getProperPassword("Enter new password: ");
-        if (learnerRepo.checkLearnerIdExist(id)) {
+        String oldPassword = PasswordEncryption.hashPassword((Utils.getProperPassword("Enter old password: ")));
+
+        if (learnerRepo.validateLogin(id, oldPassword)) {
+            String newPassword = PasswordEncryption.hashPassword(Utils.getProperPassword("Enter new password: "));
             try {
                 Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
                 PreparedStatement preparedStatement = conn.prepareStatement("UPDATE tblLearner SET Password = ? WHERE LearnerID = ?");
@@ -97,6 +100,8 @@ public class LearnerService {
             } catch (SQLException e) {
                 System.err.println("SQL Exception: " + e.getMessage());
             }
+        } else {
+            System.out.println("Old password is incorrect");
         }
     }
 
@@ -107,7 +112,6 @@ public class LearnerService {
                 String confirm = Utils.getString("Are you sure? (Y/N): ", scanner);
                 if (!confirm.equalsIgnoreCase("Y")) {
                     System.out.println("Learner not deleted");
-                    return;
                 }
                 else {
                     Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);

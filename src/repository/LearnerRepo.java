@@ -2,6 +2,7 @@ package repository;
 
 import model.JDBC;
 import model.Learner;
+import utils.PasswordEncryption;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -24,10 +25,11 @@ public class LearnerRepo {
 
     public boolean validateLogin(String learnerId, String password) {
         try {
+            String hashedPassword = PasswordEncryption.hashPassword(password);
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
             PreparedStatement prep = conn.prepareStatement("SELECT COUNT(*) FROM tblLearner WHERE LearnerID = ? AND Password = ?");
             prep.setString(1, learnerId);
-            prep.setString(2, password);
+            prep.setString(2, hashedPassword);
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1) > 0;

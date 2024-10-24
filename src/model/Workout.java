@@ -36,4 +36,20 @@ public class Workout {
     public void setCourseId(String courseId) {
         this.courseId = courseId;
     }
+
+    @Override
+    public String toString() {
+        return String.format("""
+                         +-----------------+----------------------+
+                         | %-15s | %-20s |
+                         +-----------------+----------------------+
+                         | %-15s | %-20s |
+                         | %-15s | %-20s |
+                         +-----------------+----------------------+
+                         """,
+                "Workout ID", workoutID,
+                "Name", workoutName,
+                "Course ID", courseId
+        );
+    }
 }

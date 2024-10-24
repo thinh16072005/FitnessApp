@@ -1,5 +1,7 @@
 package repository;
 
+import model.Coach;
+import model.Course;
 import model.JDBC;
 
 import java.sql.*;
@@ -24,6 +26,30 @@ public class CourseRepo {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public Course findCourseById(String courseId) {
+        Course course = null;
+        Coach coach = null;
+        try {
+            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+            PreparedStatement prep = conn.prepareStatement("SELECT (CourseID, CourseName, CourseDescription, CourseDuration, StartDate, EndDate) FROM tblCourse WHERE CoachID = ?");
+            prep.setString(1, courseId);
+            ResultSet rs = prep.executeQuery();
+            if (rs.next()) {
+                course = new Course();
+                course.setCourseID(rs.getString("CourseID"));
+                course.setCourseName(rs.getString("CourseName"));
+                course.setDescription(rs.getString("CourseDescription"));
+                course.setDuration(rs.getInt("CourseDuration"));
+                course.setStartDate(rs.getDate("StartDate"));
+                course.setEndDate(rs.getDate("EndDate"));
+                course.setCoachID(rs.getString("CoachID"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return course;
     }
 
     public ArrayList<String> getCourseList() {

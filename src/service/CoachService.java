@@ -43,35 +43,29 @@ public class CoachService {
         }
     }
 
-    public void update() {
-        String id = Utils.getString("Enter coach ID: ", scanner);
+    public void viewProfile(String coachId) {
+        System.out.println("Coach found:");
+        Coach coach = coachRepo.findCoachById(coachId);
+        System.out.println(coach);
+    }
+
+    public void update(String id) {
         try {
             System.out.println("Learner found:");
             Coach coach = coachRepo.findCoachById(id);
             System.out.println(coach);
 
-            Class<?> learnerFields = Class.forName("model.Coach");
-
-            Field[] fields = learnerFields.getDeclaredFields();
-            for (Field field : fields) {
-                System.out.print(field.getName() + "\t");
-            }
-
-            String attribute = Utils.getString("\nEnter attribute to update: ", scanner);
+            String attribute = Utils.getString("\nEnter attribute (name of column) to update: ", scanner);
             String newValue = Utils.getString("Enter new value: ", scanner);
 
             try {
-                Field field = coach.getClass().getDeclaredField(attribute);
-                field.setAccessible(true);
-                field.set(coach, newValue);
-
                 Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-                PreparedStatement preparedStatement = conn.prepareStatement("UPDATE tblCoach SET " + attribute + " = ? WHERE LearnerID = ?");
+                PreparedStatement preparedStatement = conn.prepareStatement("UPDATE tblCoach SET " + attribute + " = ? WHERE CoachID = ?");
                 preparedStatement.setString(1, newValue);
                 preparedStatement.setString(2, id);
                 preparedStatement.executeUpdate();
                 System.out.println("Coach updated");
-            } catch (NoSuchFieldException | IllegalAccessException | SQLException e) {
+            } catch (SQLException e) {
                 System.err.println("Exception: " + e.getMessage());
             }
         }
@@ -80,21 +74,44 @@ public class CoachService {
         }
     }
 
-    public void delete() {
-        String id = Utils.getString("Enter coach ID: ", scanner);
-        if (coachRepo.checkCoachIdExist(id)) {
+    public void updatePassword(String id) {
+        String oldPassword = PasswordEncryption.hashPassword((Utils.getProperPassword("Enter old password: ")));
+        if (coachRepo.validateLogin(id, oldPassword)) {
+            String newPassword = PasswordEncryption.hashPassword(Utils.getProperPassword("Enter new password: "));
             try {
                 Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-                PreparedStatement preparedStatement = conn.prepareStatement("DELETE FROM tblCoach WHERE CoachID = ?");
-                preparedStatement.setString(1, id);
+                PreparedStatement preparedStatement = conn.prepareStatement("UPDATE tblLearner SET Password = ? WHERE LearnerID = ?");
+                preparedStatement.setString(1, newPassword);
+                preparedStatement.setString(2, id);
                 preparedStatement.executeUpdate();
-                System.out.println("Coach deleted");
+                System.out.println("Password updated");
             } catch (SQLException e) {
                 System.err.println("SQL Exception: " + e.getMessage());
             }
+        } else {
+            System.out.println("Old password is incorrect");
         }
-        else {
-            System.out.println("Coach ID does not exist!");
+    }
+
+    public void delete() {
+        String coachId = Utils.getString("Enter course ID: ", scanner);
+        if (!coachRepo.checkCoachIdExist(coachId)) {
+            System.out.println("Course ID does not exist!");
+        } else {
+            String confirm = Utils.getString("Are you sure? (Y/N): ", scanner);
+            if (!confirm.equalsIgnoreCase("Y")) {
+                System.out.println("Course not deleted");
+            } else {
+                try {
+                    Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+                    PreparedStatement prep = conn.prepareStatement("DELETE FROM tblCoach WHERE CoachID = ?");
+                    prep.setString(1, coachId);
+                    prep.executeUpdate();
+                    System.out.println("Course deleted");
+                } catch (SQLException e) {
+                    System.err.println("SQL Exception: " + e.getMessage());
+                }
+            }
         }
     }
 

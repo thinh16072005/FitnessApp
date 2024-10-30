@@ -1,12 +1,11 @@
 package service;
 
-import model.Coach;
 import model.Course;
 import model.JDBC;
+import repository.CoachRepo;
 import repository.CourseRepo;
 import utils.Utils;
 
-import java.lang.reflect.Field;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -16,21 +15,23 @@ import java.util.Scanner;
 public class CourseService {
     CourseRepo courseRepo = new CourseRepo();
     Scanner scanner = new Scanner(System.in);
+    CoachRepo coachRepo = new CoachRepo();
 
-    public void add(String courseId) {
+
+    public void add(String email) {
         String courseName = Utils.getString("Enter course name: ", scanner);
         String description = Utils.getString("Enter description: ", scanner);
-        LocalDate startDate = LocalDate.parse(Utils.getString("Enter start date (dd/MM/yyyy): ", scanner), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        LocalDate endDate = LocalDate.parse(Utils.getString("Enter end date (dd/MM/yyyy): ", scanner), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        LocalDate startDate = LocalDate.parse(Utils.getValidStartDate("Enter start date (dd/MM/yyyy): "), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        LocalDate endDate = LocalDate.parse(Utils.getValidEndDate("Enter end date (dd/MM/yyyy): ", startDate), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("INSERT INTO tblCourse(CourseID, CourseName, CourseDescription, StartDate, EndDate, CoachID) VALUES (?, ?, ?, ?, ?, ?)");
+            PreparedStatement prep = conn.prepareStatement("INSERT INTO tblCourse(CourseID, CourseName, CourseDescription, StartDate, EndDate, UserID) VALUES (?, ?, ?, ?, ?, ?)");
             prep.setString(1, autoGenerateCourseID(conn));
             prep.setString(2, courseName);
             prep.setString(3, description);
             prep.setDate(4, Date.valueOf(startDate));
             prep.setDate(5, Date.valueOf(endDate));
-            prep.setString(6, courseId);
+            prep.setString(6, coachRepo.getCoachIDByEmail(email));
             prep.executeUpdate();
             System.out.println("Course added");
         } catch (SQLException e) {
@@ -38,28 +39,24 @@ public class CourseService {
         }
     }
 
-    public void update() throws ClassNotFoundException {
+    public void update() {
         String id = Utils.getString("Enter coach ID: ", scanner);
         try {
-            System.out.println("Learner found:");
-            Course course = courseRepo.findCourseById(id);
+            System.out.println("Course found:");
+            Course course = courseRepo.findCourseByEmail(id);
             System.out.println(course);
 
             String attribute = Utils.getString("\nEnter attribute (name of column) to update: ", scanner);
             String newValue = Utils.getString("Enter new value: ", scanner);
 
             try {
-                Field field = course.getClass().getDeclaredField(attribute);
-                field.setAccessible(true);
-                field.set(course, newValue);
-
                 Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-                PreparedStatement preparedStatement = conn.prepareStatement("UPDATE tblCoach SET " + attribute + " = ? WHERE LearnerID = ?");
+                PreparedStatement preparedStatement = conn.prepareStatement("UPDATE tblCourse SET " + attribute + " = ? WHERE CourseID = ?");
                 preparedStatement.setString(1, newValue);
                 preparedStatement.setString(2, id);
                 preparedStatement.executeUpdate();
                 System.out.println("Coach updated");
-            } catch (NoSuchFieldException | IllegalAccessException | SQLException e) {
+            } catch (SQLException e) {
                 System.err.println("Exception: " + e.getMessage());
             }
         }
@@ -70,9 +67,11 @@ public class CourseService {
 
     public void delete() {
         String courseId = Utils.getString("Enter course ID: ", scanner);
+        Course course = courseRepo.findCourseByEmail(courseId);
         if (!courseRepo.checkCourseIdExist(courseId)) {
             System.out.println("Course ID does not exist!");
         } else {
+            System.out.println(course);
             String confirm = Utils.getString("Are you sure? (Y/N): ", scanner);
             if (!confirm.equalsIgnoreCase("Y")) {
                 System.out.println("Course not deleted");
@@ -99,21 +98,16 @@ public class CourseService {
         }
     }
 
-    public void displayLearners() {
-        String courseId = Utils.getString("Enter course ID: ", scanner);
-        if (!courseRepo.checkCourseIdExist(courseId)) {
-            System.out.println("Course ID does not exist!");
-            return;
-        }
-
+    public void displayLearners(String coachId) {
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
             PreparedStatement prep = conn.prepareStatement(
-                    "SELECT LearnerID, LearnerFirstName, LearnerLastName, LearnerEmail, LearnerPhone, LearnerAge, LearnerDob " +
-                            "FROM tblLearner " +
-                            "WHERE LearnerID IN (SELECT LearnerID FROM tblSubscription WHERE CourseID = ?)"
-            );
-            prep.setString(1, courseId);
+                    "SELECT l.UserID, l.UserFirstName, l.UserLastName, l.UserEmail, l.UserPhone, l.UserAge, l.UserDOB " +
+                            "FROM tblUser l " +
+                            "JOIN tblSubscription s ON l.UserID = s.LearnerID " +
+                            "JOIN tblCourse c ON s.CourseID = c.CourseID " +
+                            "WHERE c.CoachID = ?");
+            prep.setString(1, coachId);
             ResultSet rs = prep.executeQuery();
 
             System.out.printf("%-10s %-15s %-15s %-25s %-15s %-5s %-10s%n", "LearnerID", "First Name", "Last Name", "Email", "Phone", "Age", "DOB");
@@ -142,7 +136,7 @@ public class CourseService {
             if (resultSet.next()) {
                 String maxID = resultSet.getString("maxID");
                 if (maxID != null) {
-                    int idNumber = Integer.parseInt(maxID.substring(1)) + 1;
+                    int idNumber = Integer.parseInt(maxID.substring(2)) + 1;
                     newCourseId = String.format("CS%03d", idNumber);
                 }
             }

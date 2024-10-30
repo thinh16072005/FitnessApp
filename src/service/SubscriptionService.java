@@ -1,6 +1,7 @@
 package service;
 
 import model.JDBC;
+import model.Subscription;
 import repository.CourseRepo;
 import repository.LearnerRepo;
 import repository.SubscriptionRepo;
@@ -23,12 +24,17 @@ public class SubscriptionService {
 
     public void register(String learnerId) {
         courseService.display();
-        String courseId = Utils.getString("Enter course ID: ", input);
+        String courseId = Utils.getString("Enter course ID (CSxxx): ", input);
         if (!courseRepo.checkCourseIdExist(courseId)) {
             System.out.println("Course ID does not exist!");
             return;
         }
-
+//        else {
+//            if (subscriptionRepo.checkSubscriptionStatus(courseId, learnerId)) {
+//                System.out.println("You have already subscribed to this course!");
+//                return;
+//            }
+//        }
         // Prompt user to select 3 slots for the week
         System.out.println("Please select 3 slots across the week for this course.");
         int slotsSelected = 0;
@@ -45,23 +51,42 @@ public class SubscriptionService {
             System.out.println("You have selected slot " + slot + " for " + getDayOfWeek(day) + ".");
         }
 
-        try {
-            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("INSERT INTO tblSchedule (SubscriptionID, LearnerID, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            prep.setString(1, autoGenerateSubscriptionID(conn));
-            prep.setString(2, learnerId);
-            // Setting slots for each day of the week
-            prep.setInt(3, weeklySlots.get(0)); // Sunday
-            prep.setInt(4, weeklySlots.get(1)); // Monday
-            prep.setInt(5, weeklySlots.get(2)); // Tuesday
-            prep.setInt(6, weeklySlots.get(3)); // Wednesday
-            prep.setInt(7, weeklySlots.get(4)); // Thursday
-            prep.setInt(8, weeklySlots.get(5)); // Friday
-            prep.setInt(9, weeklySlots.get(6)); // Saturday
-            prep.executeUpdate();
-            System.out.println("Subscription added successfully.");
-        } catch (SQLException e) {
-            System.err.println("SQL Exception: " + e.getMessage());
+        String platform = Utils.getPlatform("Enter platform (Online / Offline): ", input);
+
+        String confirm = Utils.getString("Are you sure? (Y/N): ", input);
+        if (!confirm.equalsIgnoreCase("Y")) {
+            System.out.println("Subscription not added.");
+            return;
+        }
+        else {
+            try {
+                Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+                // First, we add subscription info into tblSubscription
+                PreparedStatement prepared = conn.prepareStatement("INSERT INTO tblSubscription (SubscriptionID, LearnerID, CourseID, EnrollDate, Platform, Status) VALUES (?, ?, ?, ?, ?, ?)");
+                prepared.setString(1, autoGenerateSubscriptionID(conn));
+                prepared.setString(2, learnerId);
+                prepared.setString(3, courseId);
+                prepared.setString(4, enrollDate);
+                prepared.setString(5, platform);
+                prepared.setString(6, subscriptionRepo.getSubscriptionStatus(subscriptionRepo.getSubscriptionId(learnerId, courseId)));
+                prepared.executeUpdate();
+
+                PreparedStatement prep = conn.prepareStatement("INSERT INTO tblSchedule (SubscriptionID, LearnerID, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                prep.setString(1, autoGenerateSubscriptionID(conn));
+                prep.setString(2, learnerId);
+                // Setting slots for each day of the week
+                prep.setInt(3, weeklySlots.get(0)); // Sunday
+                prep.setInt(4, weeklySlots.get(1)); // Monday
+                prep.setInt(5, weeklySlots.get(2)); // Tuesday
+                prep.setInt(6, weeklySlots.get(3)); // Wednesday
+                prep.setInt(7, weeklySlots.get(4)); // Thursday
+                prep.setInt(8, weeklySlots.get(5)); // Friday
+                prep.setInt(9, weeklySlots.get(6)); // Saturday
+                prep.executeUpdate();
+                System.out.println("Subscription added successfully.");
+            } catch (SQLException e) {
+                System.err.println("SQL Exception: " + e.getMessage());
+            }
         }
     }
 
@@ -75,7 +100,7 @@ public class SubscriptionService {
     }
 
     public void viewWeeklySubscription(String learnerId, String courseName) {
-        if (!learnerRepo.checkLearnerIdExist(learnerId)) {
+        if (!learnerRepo.checkLearnerExist(learnerId)) {
             System.out.println("Learner ID does not exist!");
             return;
         }
@@ -109,17 +134,31 @@ public class SubscriptionService {
     }
 
     public void unenroll() {
+        Queue<String> subscriptions = subscriptionRepo.getSubscriptionList();
+        if (subscriptions.isEmpty()) {
+            System.out.println("You have no subscriptions to unenroll from.");
+            return;
+        }
+
+
         String subscriptionId = Utils.getString("Enter subscription ID: ", input);
+        Subscription sub = subscriptionRepo.findSubscriptionById(subscriptionId);
         if (!subscriptionRepo.checkSubscriptionIdExist(subscriptionId)) {
             System.out.println("Subscription ID does not exist!");
         } else {
             try {
+                System.out.println(sub);
                 String confirm = Utils.getString("Are you sure? (Y/N): ", input);
                 if (!confirm.equalsIgnoreCase("Y")) {
                     System.out.println("Subscription not deleted.");
                     return;
                 } else {
                     Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+                    // Delete the schedule first
+                    PreparedStatement prepSchedule = conn.prepareStatement("DELETE FROM tblSchedule WHERE SubscriptionID = ?");
+                    prepSchedule.setString(1, subscriptionId);
+                    prepSchedule.executeUpdate();
+                    // Delete the subscription
                     PreparedStatement prep = conn.prepareStatement("DELETE FROM tblSubscription WHERE SubscriptionID = ?");
                     prep.setString(1, subscriptionId);
                     prep.executeUpdate();

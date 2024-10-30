@@ -20,33 +20,25 @@ public class LearnerMenu {
     };
     static Scanner input = new Scanner(System.in);
 
-    public static void displayLearnerMenu() throws ClassNotFoundException {
+    public static void displayLearnerMenu(String email) throws Exception {
         SubscriptionService subscriptionService = new SubscriptionService();
         SubscriptionRepo subscriptionRepo = new SubscriptionRepo();
         LearnerRepo learnerRepo = new LearnerRepo();
         LearnerService learnerService = new LearnerService();
 
-        String learnerId = Utils.getString("Enter learner ID: ", input);
-        String password = Utils.getProperPassword("Enter password: ");
-
-        if (!learnerRepo.validateLogin(learnerId, password)) {
-            System.err.println("Invalid login credentials");
-            return;
-        }
-
-        Menu<String> coachMenu = new Menu<>("\nHELLO, LEARNER " + learnerId, learnerOptions) {
+        Menu coachMenu = new Menu("\nHELLO, LEARNER " + learnerRepo.getLearnerFirstName(email), learnerOptions) {
             @Override
-            public void execute(int ch) {
+            public void execute(int ch) throws ClassNotFoundException {
                 switch (ch) {
                     case 1 -> {
                         String courseId = Utils.getString("Enter course ID: ", input);
-                        subscriptionService.viewWeeklySubscription(learnerId, subscriptionRepo.getCourseName(subscriptionRepo.getSubscriptionId(learnerId, courseId)));
+                        subscriptionService.viewWeeklySubscription(email, subscriptionRepo.getCourseName(subscriptionRepo.getSubscriptionId(email, courseId)));
                     }
-                    case 2 -> subscriptionService.register(learnerId);
+                    case 2 -> subscriptionService.register(email);
                     case 3 -> subscriptionService.unenroll();
-                    case 4 -> learnerService.viewProfile(learnerId);
-                    case 5 -> learnerService.update(learnerId);
-                    case 6 -> learnerService.updatePassword(learnerId);
+                    case 4 -> learnerService.viewProfile(email);
+                    case 5 -> learnerService.update(email, "Learner");
+                    case 6 -> learnerService.updatePassword(email);
                 }
             }
         };

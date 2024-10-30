@@ -1,11 +1,16 @@
 package model;
 
+import java.util.Date;
+
 public class Coach {
     private String coachId;
     private String coachFirstName;
     private String coachLastName;
     private String coachEmail;
     private String coachPhoneNumber;
+    private Date coachDob;
+    private int coachAge;
+
 
     public Coach() {}
 
@@ -57,22 +62,40 @@ public class Coach {
         this.coachPhoneNumber = coachPhoneNumber;
     }
 
+    public Date getCoachDob() {
+        return coachDob;
+    }
+
+    public void setCoachDob(Date coachDob) {
+        this.coachDob = coachDob;
+    }
+
+    public int getCoachAge() {
+        return coachAge;
+    }
+
+    public void setCoachAge(int coachAge) {
+        this.coachAge = coachAge;
+    }
+
     @Override
     public String toString() {
         return String.format("""
                          +-----------------+----------------------+
                          | %-15s | %-20s |
-                         +-----------------+----------------------+
+                         | %-15s | %-20s |
                          | %-15s | %-20s |
                          | %-15s | %-20s |
                          | %-15s | %-20s |
                          | %-15s | %-20s |
                          +-----------------+----------------------+
                          """,
-                         "Coach ID", coachId,
                          "First Name", coachFirstName,
                          "Last Name", coachLastName,
                          "Email", coachEmail,
-                         "Phone Number", coachPhoneNumber);
+                         "Phone Number", coachPhoneNumber,
+                         "Date of Birth", coachDob,
+                         "Age", coachAge
+        );
     }
 }

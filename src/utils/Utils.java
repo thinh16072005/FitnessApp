@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 public class Utils {
     private static final Scanner scanner = new Scanner(System.in);
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public static String getString(String command, Scanner input) {
         System.out.print(command + " ");
@@ -79,10 +80,6 @@ public class Utils {
             }
         }
         return i;
-    }
-
-    public static String getValidFruitName(String prompt) {
-        return getProperString(prompt);
     }
 
     public static double getDouble(String command, Scanner input) {
@@ -179,6 +176,39 @@ public class Utils {
 //    }
     }
 
+    public static String getValidStartDate(String prompt) {
+        LocalDate currentDate = LocalDate.now();
+        while (true) {
+            String startDateStr = getValue(prompt);
+            try {
+                LocalDate startDate = LocalDate.parse(startDateStr, formatter);
+                if (!startDate.isBefore(currentDate)) {
+                    return startDateStr;
+                } else {
+                    System.err.println("Start date cannot be in the past.");
+                }
+            } catch (DateTimeParseException e) {
+                System.err.println("Invalid date format. Please enter the date in dd/MM/yyyy format.");
+            }
+        }
+    }
+
+    public static String getValidEndDate(String prompt, LocalDate startDateStr) {
+        while (true) {
+            String endDateStr = getValue(prompt);
+            try {
+                LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+                if (endDate.isAfter(startDateStr)) {
+                    return endDateStr;
+                } else {
+                    System.out.println("End date must be after start date.");
+                }
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Please enter the date in dd/MM/yyyy format.");
+            }
+        }
+    }
+
     private static String capitalizeWords(String phrase) {
         String[] words = phrase.toLowerCase().split("\\s+ ");
         StringBuilder capitalizedPhrase = new StringBuilder();
@@ -258,6 +288,7 @@ public class Utils {
         }
     }
 
+
     public static String getValidEmail(String prompt) {
         Pattern regex = Pattern.compile("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
         while (true) {
@@ -299,7 +330,7 @@ public class Utils {
         String password;
 
         while (true) {
-            System.out.print("Enter a valid password: ");
+            System.out.print(prompt);
             password = scanner.nextLine();
 
             // Check if the password is at least 8 characters long
@@ -339,6 +370,19 @@ public class Utils {
 
     public static int calculateDuration(LocalDate startDate, LocalDate endDate) {
         return (int) ChronoUnit.DAYS.between(startDate, endDate);
+    }
+
+    public static String getPlatform(String prompt, Scanner input) {
+        Pattern regex = Pattern.compile("^(Online|Offline)$");
+        while (true) {
+            String platform = getString(prompt, input);
+            if (regex.matcher(platform).matches()) {
+                return platform;
+            } else {
+                System.out.println("Invalid input. Platform must be either 'Online' or 'Offline'.");
+            }
+        }
+
     }
 
 }

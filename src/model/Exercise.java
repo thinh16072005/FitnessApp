@@ -1,19 +1,17 @@
 package model;
 
-import java.time.Duration;
-
 public class Exercise {
     String exerciseName;
     int sets;
     int reps;
     double caloriesBurn;
     String note;
-    Duration duration;
+    int duration;
     String workoutId;
 
     public Exercise() {}
 
-    public Exercise(String exerciseName, int sets, int reps, double caloriesBurn, Duration duration, String note) {
+    public Exercise(String exerciseName, int sets, int reps, double caloriesBurn, int duration, String note) {
         this.exerciseName = exerciseName;
         this.sets = sets;
         this.reps = reps;
@@ -62,11 +60,11 @@ public class Exercise {
         this.note = note;
     }
 
-    public Duration getDuration() {
+    public int getDuration() {
         return duration;
     }
 
-    public void setDuration(Duration duration) {
+    public void setDuration(int duration) {
         this.duration = duration;
     }
 
@@ -87,7 +85,7 @@ public class Exercise {
                         | %-15s | %-20s |
                         | %-15s | %-20s |
                         | %-15s | %-20s |
-                        | %-15s | %-20s |
+                        | %-15s | %-20d |
                         | %-15s | %-20s |
                         +-----------------+----------------------+
                         """,

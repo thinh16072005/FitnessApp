@@ -19,7 +19,7 @@ public class AdminMenu {
             "Logout"};
     static Scanner input = new Scanner(System.in);
 
-    public static void displayAdminMenu() throws ClassNotFoundException {
+    public static void displayAdminMenu() throws Exception {
         CoachService coachService = new CoachService();
         LearnerService learnerService = new LearnerService();
         AdminRepo adminRepo = new AdminRepo();
@@ -32,7 +32,7 @@ public class AdminMenu {
             return;
         }
 
-        Menu<String> adminCoachMenu = new Menu<>("\nHELLO, ADMIN", adminCoachOptions) {
+        Menu adminCoachMenu = new Menu("\nHELLO, ADMIN", adminCoachOptions) {
             @Override
             public void execute(int ch) {
                 switch (ch) {

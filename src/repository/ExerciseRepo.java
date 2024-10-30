@@ -33,13 +33,13 @@ public class ExerciseRepo {
             PreparedStatement prep = conn.prepareStatement("SELECT * FROM tblExercise");
             ResultSet rs = prep.executeQuery();
             while (rs.next()) {
-                exerciseList.add(rs.getString("CourseID"));
-                exerciseList.add(rs.getString("CourseName"));
-                exerciseList.add(rs.getString("CourseDescription"));
-                exerciseList.add(rs.getString("CourseDuration"));
-                exerciseList.add(rs.getString("StartDate"));
-                exerciseList.add(rs.getString("EndDate"));
-                exerciseList.add(rs.getString("CoachID"));
+                exerciseList.add(rs.getString("ExerciseID"));
+                exerciseList.add(rs.getString("ExerciseName"));
+                exerciseList.add(rs.getString("ExerciseDuration"));
+                exerciseList.add(rs.getString("WorkoutID"));
+                exerciseList.add(rs.getString("Sets"));
+                exerciseList.add(rs.getString("Reps"));
+                exerciseList.add(rs.getString("CaloriesBurn"));
             }
         } catch (SQLException e) {
             e.printStackTrace();

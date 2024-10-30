@@ -1,29 +1,25 @@
 package controller;
 
-import view.AdminMenu;
-import view.CoachMenu;
-import view.LearnerMenu;
-import view.Menu;
+import view.*;
 
-public class Main extends Menu<String>{
-    static String[] mainMenu = {"Coach", "Learner", "Admin", "Exit"};
+public class Main extends Menu {
+    static String[] loginOptions = {"Login", "Register", "Exit"};
 
     public Main(String title, String[] options) {
         super(title, options);
     }
 
     @Override
-    public void execute(int n) throws ClassNotFoundException {
+    public void execute(int n) throws Exception {
         switch (n) {
-            case 1 -> CoachMenu.displayCoachMenu();
-            case 2 -> LearnerMenu.displayLearnerMenu();
-            case 3 -> AdminMenu.displayAdminMenu();
-            case 4 -> System.exit(0);
+            case 1 -> LoginRegisterMenu.displayLogin();
+            case 2 -> LoginRegisterMenu.displayRegister();
+            case 3 -> System.exit(0);
         }
     }
 
-    public static void main(String[] args) throws ClassNotFoundException {
-        Main mainApp = new Main("FITNESS APP", mainMenu);
+    public static void main(String[] args) throws Exception {
+        Main mainApp = new Main("WELCOME TO THE FITNESS APP", loginOptions);
         mainApp.run();
     }
 }

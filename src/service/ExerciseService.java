@@ -2,6 +2,7 @@ package service;
 
 import model.JDBC;
 import repository.ExerciseRepo;
+import repository.WorkoutRepo;
 import utils.Utils;
 
 import java.sql.*;
@@ -11,9 +12,14 @@ import java.util.Scanner;
 public class ExerciseService {
     Scanner input = new Scanner(System.in);
     ExerciseRepo exerciseRepo = new ExerciseRepo();
+    WorkoutRepo workoutRepo = new WorkoutRepo();
 
     public void add() {
-        String workoutID = Utils.getWorkoutId("Enter workout ID: ", input);
+        String workoutID = Utils.getWorkoutId("Enter workout ID (Wxxx): ", input);
+        if (!workoutRepo.checkWorkoutIdExist(workoutID)) {
+            System.out.println("Workout ID does not exist!");
+            return;
+        }
         String exerciseName = Utils.getString("Enter exercise name: ", input);
         int duration = Utils.getInt("Enter duration: ", input);
         int set = Utils.getInt("Enter set: ", input);
@@ -27,14 +33,13 @@ public class ExerciseService {
         else {
             try {
                 Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-                PreparedStatement prep = conn.prepareStatement("INSERT INTO tblExercise VALUES (?, ?, ?, ?, ?, ?, ?)");
+                PreparedStatement prep = conn.prepareStatement("INSERT INTO tblExercise VALUES (?, ?, ?, ?, ?, ?)");
                 prep.setString(1, autoGenerateExerciseID(conn));
                 prep.setString(2, exerciseName);
                 prep.setInt(3, duration);
-                prep.setString(4, workoutID);
-                prep.setInt(5, set);
-                prep.setInt(6, rep);
-                prep.setDouble(7, calories);
+                prep.setInt(4, set);
+                prep.setInt(5, rep);
+                prep.setDouble(6, calories);
                 prep.executeUpdate();
                 System.out.println("\nExercise added");
             } catch (SQLException e) {
@@ -85,7 +90,7 @@ public class ExerciseService {
 
     public void display() {
         ArrayList<String> exerciseList = exerciseRepo.getExerciseList();
-        System.out.printf("%-10s %-20s %-20s %-25s %-15s %-10s %-20s%n", "CourseID", "Course Name", "Description", "Duration (days)", "Start Date", "End Date", "Coach ID");
+        System.out.printf("%-10s %-20s %-20s %-25s %-15s %-10s %-20s%n", "Exercise ID", "Exercise Name", "Duration (mins)", "Workout ID", "Sets", "Reps", "Calories");
         System.out.println("-----------------------------------------------------------------------------------------------");
         for (int i = 0; i < exerciseList.size(); i += 7) {
             System.out.printf("%-10s %-20s %-20s %-25s %-15s %-15s %-20s%n", exerciseList.get(i), exerciseList.get(i + 1), exerciseList.get(i + 2), exerciseList.get(i + 3), exerciseList.get(i + 4), exerciseList.get(i + 5), exerciseList.get(i + 6));

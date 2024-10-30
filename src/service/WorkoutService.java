@@ -17,7 +17,7 @@ public class WorkoutService {
     WorkoutRepo workoutRepo = new WorkoutRepo();
 
     public void add() {
-        String courseId = Utils.getString("Enter course ID: ", input);
+        String courseId = Utils.getString("Enter course ID (Cxxx): ", input);
         if (!courseRepo.checkCourseIdExist(courseId)) {
             System.out.println("Course ID does not exist!");
         }
@@ -43,7 +43,7 @@ public class WorkoutService {
     public void update() {
         Workout workout = new Workout();
 
-        String workoutID = Utils.getProperString("Enter workout ID: ");
+        String workoutID = Utils.getProperString("Enter workout ID (Wxxx): ");
         if (!workoutRepo.checkWorkoutIdExist(workoutID)) {
             System.out.println("Workout ID does not exist!");
         }
@@ -51,17 +51,13 @@ public class WorkoutService {
             String attribute = Utils.getProperString("Enter attribute to update: ");
             String newValue = Utils.getProperString("Enter new value: ");
             try {
-                Field field = workout.getClass().getDeclaredField(attribute);
-                field.setAccessible(true);
-                field.set(workout, newValue);
-
                 Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
                 PreparedStatement preparedStatement = conn.prepareStatement("UPDATE tblWorkout SET " + attribute + " = ? WHERE WorkoutID = ?");
                 preparedStatement.setString(1, newValue);
                 preparedStatement.setString(2, workoutID);
                 preparedStatement.executeUpdate();
                 System.out.println("Workout updated");
-            } catch (NoSuchFieldException | IllegalAccessException | SQLException e) {
+            } catch (SQLException e) {
                 System.err.println("Exception: " + e.getMessage());
             }
         }
@@ -71,7 +67,6 @@ public class WorkoutService {
         String workoutID = Utils.getProperString("Enter workout ID: ");
         if (!courseRepo.checkCourseIdExist(workoutID)) {
             System.out.println("Workout ID does not exist!");
-            return;
         } else {
             try {
                 String confirm = Utils.getString("Are you sure? (Y/N): ", input);

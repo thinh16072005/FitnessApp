@@ -60,11 +60,7 @@ public class Subscription {
     }
 
     public void setPlatform(String platform) {
-        if (platform.equalsIgnoreCase("online") || platform.equalsIgnoreCase("offline")) {
-            this.platform = platform;
-        } else {
-            throw new IllegalArgumentException("Platform must be either 'online' or 'offline'");
-        }
+        this.platform = platform;
     }
 
     public String getStatus() {

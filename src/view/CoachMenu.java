@@ -2,9 +2,6 @@ package view;
 
 import repository.CoachRepo;
 import service.CoachService;
-import utils.Utils;
-
-import java.util.Scanner;
 
 public class CoachMenu {
     public static String[] coachOptions = {
@@ -14,33 +11,25 @@ public class CoachMenu {
             "View profile",
             "Update profile",
             "Change password",
-            "Exit"
+            "Logout"
             };
-    static Scanner input = new Scanner(System.in);
 
-    public static void displayCoachMenu() throws ClassNotFoundException {
+    public static void displayCoachMenu(String email) throws Exception {
         CoachRepo coachRepo = new CoachRepo();
         CoachSubMenus coachSubMenus = new CoachSubMenus();
         CoachService coachService = new CoachService();
 
-        String coachId = Utils.getString("Enter coach ID: ", input);
-        String password = Utils.getProperPassword("Enter password: ");
-
-        if (!coachRepo.validateLogin(coachId, password)) {
-            System.out.println("Invalid login credentials");
-            return;
-        }
-        Menu<String> coachMenu = new Menu<>("\nHELLO, COACH " + coachId, coachOptions) {
+        Menu coachMenu = new Menu("\nHELLO, COACH " + coachRepo.getCoachFirstName(email), coachOptions) {
             @Override
-            public void execute(int ch) throws ClassNotFoundException {
+            public void execute(int ch) throws Exception {
                 switch (ch) {
-                    case 1 -> coachSubMenus.displayCourseMenu(coachId);
+                    case 1 -> coachSubMenus.displayCourseMenu(email);
                     case 2 -> coachSubMenus.displayWorkoutMenu();
                     case 3 -> coachSubMenus.displayExerciseMenu();
-                    case 4 -> coachService.viewProfile(coachId);
-                    case 5 -> coachService.update(coachId);
-                    case 6 -> coachService.updatePassword(coachId);
-                    case 7 -> {}
+                    case 4 -> coachService.viewProfile(email);
+                    case 5 -> coachService.update(email, "Coach");
+                    case 6 -> coachService.updatePassword(email);
+                    case 7 -> System.out.println("\nLogging out...");
                 }
             }
         };

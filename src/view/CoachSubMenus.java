@@ -6,30 +6,32 @@ import service.WorkoutService;
 
 public class CoachSubMenus {
 
-    public void displayCourseMenu(String id) throws ClassNotFoundException {
+    public void displayCourseMenu(String email) throws Exception {
         CourseService courseService = new CourseService();
         String[] courseOptions = {
                 "View course",
                 "Create course",
                 "Update course",
                 "Delete course",
+                "Display learners of your course",
                 "Exit"
         };
-        Menu<String> courseMenu = new Menu<>("COURSE MANAGEMENT", courseOptions) {
+        Menu courseMenu = new Menu("COURSE MANAGEMENT", courseOptions) {
             @Override
             public void execute(int ch) throws ClassNotFoundException {
                 switch (ch) {
                     case 1 -> courseService.display();
-                    case 2 -> courseService.add(id);
+                    case 2 -> courseService.add(email);
                     case 3 -> courseService.update();
                     case 4 -> courseService.delete();
+                    case 5 -> courseService.displayLearners(email);
                 }
             }
         };
         courseMenu.run();
     }
 
-    public void displayWorkoutMenu() throws ClassNotFoundException {
+    public void displayWorkoutMenu() throws Exception {
         WorkoutService workoutService = new WorkoutService();
 
         String[] workoutOptions = {
@@ -39,7 +41,7 @@ public class CoachSubMenus {
                 "Delete workout",
                 "Exit"
         };
-        Menu<String> workoutMenu = new Menu<>("WORKOUT MANAGEMENT", workoutOptions) {
+        Menu workoutMenu = new Menu("WORKOUT MANAGEMENT", workoutOptions) {
             @Override
             public void execute(int ch) throws ClassNotFoundException {
                 switch (ch) {
@@ -53,7 +55,7 @@ public class CoachSubMenus {
         workoutMenu.run();
     }
 
-    public void displayExerciseMenu() throws ClassNotFoundException {
+    public void displayExerciseMenu() throws Exception {
         ExerciseService exerciseService = new ExerciseService();
 
         String[] exerciseOptions = {
@@ -63,7 +65,7 @@ public class CoachSubMenus {
                 "Delete exercise",
                 "Exit"
         };
-        Menu<String> exerciseMenu = new Menu<>("EXERCISE MANAGEMENT", exerciseOptions) {
+        Menu exerciseMenu = new Menu("EXERCISE MANAGEMENT", exerciseOptions) {
             @Override
             public void execute(int ch) {
                 switch (ch) {

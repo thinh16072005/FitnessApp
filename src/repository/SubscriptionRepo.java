@@ -1,7 +1,7 @@
 package repository;
 
-import model.Course;
 import model.JDBC;
+import model.Learner;
 import model.Subscription;
 
 import java.sql.*;
@@ -12,6 +12,28 @@ import java.util.PriorityQueue;
 import java.util.Comparator;
 
 public class SubscriptionRepo {
+
+    public Subscription findSubscriptionById(String subId) {
+        Subscription sub = null;
+        try {
+            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+            PreparedStatement prep = conn.prepareStatement("SELECT * FROM tblSubscription WHERE SubscriptionID = ?");
+            prep.setString(1, subId);
+            ResultSet rs = prep.executeQuery();
+            if (rs.next()) {
+                sub = new Subscription();
+                sub.setSubscriptionId(rs.getString("SubscriptionID"));
+                sub.setLearnerId(rs.getString("LearnerID"));
+                sub.setCourseId(rs.getString("CourseID"));
+                sub.setEnrollmentDate(rs.getDate("EnrollDate").toLocalDate());
+                sub.setPlatform(rs.getString("LearnerPhone"));
+                sub.setStatus(rs.getString("LearnerDob"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return sub;
+    }
 
     public boolean checkSubscriptionIdExist(String subscriptionId) {
         try {
@@ -91,5 +113,52 @@ public class SubscriptionRepo {
             System.err.println("SQL Exception: " + e.getMessage());
         }
         return subscriptionId;
+    }
+
+//    public boolean checkSubscriptionStatus(String learnerId, String courseId) {
+//        try {
+//            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+//            PreparedStatement prep = conn.prepareStatement("SELECT Status FROM tblSubscription WHERE LearnerID = ? AND CourseID = ?");
+//            prep.setString(1, learnerId);
+//            prep.setString(2, courseId);
+//            ResultSet rs = prep.executeQuery();
+//            if (rs.next()) {
+//                String status = rs.getString("Status");
+//                return status.equals("Not Started");
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return true;
+//    }
+
+    public String getSubscriptionStatus(String subscriptionId) {
+        String status = "Unknown";
+        try {
+            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+            PreparedStatement prep = conn.prepareStatement(
+                    "SELECT tblCourse.StartDate, tblCourse.EndDate " +
+                            "FROM tblCourse " +
+                            "JOIN tblSubscription ON tblCourse.CourseID = tblSubscription.CourseID " +
+                            "WHERE tblSubscription.SubscriptionID = ?");
+            prep.setString(1, subscriptionId);
+            ResultSet rs = prep.executeQuery();
+            if (rs.next()) {
+                LocalDate startDate = rs.getDate("StartDate").toLocalDate();
+                LocalDate endDate = rs.getDate("EndDate").toLocalDate();
+                LocalDate currentDate = LocalDate.now();
+
+                if (currentDate.isBefore(startDate)) {
+                    status = "Not Started";
+                } else if (currentDate.isAfter(endDate)) {
+                    status = "Completed";
+                } else {
+                    status = "Ongoing";
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("SQL Exception: " + e.getMessage());
+        }
+        return status;
     }
 }

@@ -26,42 +26,61 @@ public class CoachRepo {
         return false;
     }
 
-    public boolean validateLogin(String coachId, String password) {
+    public String getCoachIDByEmail(String email) {
+        String coachId = "";
         try {
-            String hashedPassword = PasswordEncryption.hashPassword(password);
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT COUNT(*) FROM tblCoach WHERE CoachID = ? AND Password = ?");
-            prep.setString(1, coachId);
-            prep.setString(2, hashedPassword);
+            PreparedStatement prep = conn.prepareStatement("SELECT UserID FROM tblUser WHERE UserRole = 'Coach' AND UserEmail = ?");
+            prep.setString(1, email);
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1) > 0;
+                coachId = rs.getString("UserID");
             }
         } catch (SQLException e) {
-            System.err.println("SQL Exception: " + e.getMessage());
+            e.printStackTrace();
         }
-        return false;
+        return coachId;
     }
 
-    public Coach findCoachById(String coachId) {
+    public Coach findCoachById(String email) {
         Coach coach = null;
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT CoachID, CoachFirstName, CoachLastName, CoachEmail, CoachPhone FROM tblCoach WHERE CoachID = ?");
-            prep.setString(1, coachId);
+            PreparedStatement prep = conn.prepareStatement("SELECT UserID, UserFirstName, UserLastName, UserEmail, UserPhone, UserDOB, UserAge FROM tblUser WHERE UserEmail = ?");
+            prep.setString(1, email);
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {
                 coach = new Coach();
-                coach.setCoachId(rs.getString("CoachID"));
-                coach.setCoachFirstName(rs.getString("CoachFirstName"));
-                coach.setCoachLastName(rs.getString("CoachLastName"));
-                coach.setCoachEmail(rs.getString("CoachEmail"));
-                coach.setCoachPhoneNumber(rs.getString("CoachPhone"));
+                coach.setCoachId(rs.getString("UserID"));
+                coach.setCoachFirstName(rs.getString("UserFirstName"));
+                coach.setCoachLastName(rs.getString("UserLastName"));
+                coach.setCoachEmail(rs.getString("UserEmail"));
+                coach.setCoachPhoneNumber(rs.getString("UserPhone"));
+                coach.setCoachDob(rs.getDate("UserDOB"));
+                coach.setCoachAge(rs.getInt("UserAge"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return coach;
+    }
+
+    public String getCoachFirstName(String email) {
+        String coachName = "";
+        try {
+            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+            PreparedStatement prep = conn.prepareStatement("SELECT UserFirstName FROM tblUser WHERE UserRole = ? AND UserEmail = ?");
+            prep.setString(1, "Coach");
+            prep.setString(2, email);
+            ResultSet rs = prep.executeQuery();
+            if (rs.next()) {
+                coachName = rs.getString("UserFirstName");
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return coachName;
     }
 
 

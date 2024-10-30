@@ -1,6 +1,5 @@
 package repository;
 
-import model.Coach;
 import model.Course;
 import model.JDBC;
 
@@ -28,12 +27,12 @@ public class CourseRepo {
         return false;
     }
 
-    public Course findCourseById(String courseId) {
+    // src/repository/CourseRepo.java
+    public Course findCourseByEmail(String courseId) {
         Course course = null;
-        Coach coach = null;
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT (CourseID, CourseName, CourseDescription, CourseDuration, StartDate, EndDate) FROM tblCourse WHERE CoachID = ?");
+            PreparedStatement prep = conn.prepareStatement("SELECT CourseID, CourseName, CourseDescription, CourseDuration, StartDate, EndDate, CoachID FROM tblCourse WHERE CourseID = ?");
             prep.setString(1, courseId);
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {
@@ -65,7 +64,7 @@ public class CourseRepo {
                 courseList.add(rs.getString("CourseDuration"));
                 courseList.add(rs.getString("StartDate"));
                 courseList.add(rs.getString("EndDate"));
-                courseList.add(rs.getString("CoachID"));
+                courseList.add(rs.getString("UserID"));
             }
         } catch (SQLException e) {
             e.printStackTrace();

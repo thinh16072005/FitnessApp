@@ -94,8 +94,6 @@ public class Learner {
         return String.format("""
                          +-----------------+----------------------+
                          | %-15s | %-20s |
-                         +-----------------+----------------------+
-                         | %-15s | %-20s |
                          | %-15s | %-20s |
                          | %-15s | %-20s |
                          | %-15s | %-20s |
@@ -103,7 +101,6 @@ public class Learner {
                          | %-15s | %-20s |
                          +-----------------+----------------------+
                          """,
-                "Learner ID", id,
                 "First Name", LearnerFirstName,
                 "Last Name", LearnerLastName,
                 "Email", LearnerEmail,

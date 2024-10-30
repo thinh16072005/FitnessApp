@@ -8,11 +8,12 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class LearnerRepo {
-    public boolean checkLearnerIdExist(String learnerId) {
+    public boolean checkLearnerExist(String email) {
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT COUNT(*) FROM tblLearner WHERE LearnerID = ?");
-            prep.setString(1, learnerId);
+            PreparedStatement prep = conn.prepareStatement("SELECT COUNT(*) FROM tblUser WHERE UserRole = ? AND UserEmail = ?");
+            prep.setString(1, "Learner");
+            prep.setString(2, email);
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1) > 0;
@@ -23,44 +24,47 @@ public class LearnerRepo {
         return false;
     }
 
-    public boolean validateLogin(String learnerId, String password) {
-        try {
-            String hashedPassword = PasswordEncryption.hashPassword(password);
-            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT COUNT(*) FROM tblLearner WHERE LearnerID = ? AND Password = ?");
-            prep.setString(1, learnerId);
-            prep.setString(2, hashedPassword);
-            ResultSet rs = prep.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-        } catch (SQLException e) {
-            System.err.println("SQL Exception: " + e.getMessage());
-        }
-        return false;
-    }
 
-    public Learner findLearnerById(String learnerId) {
+
+    public Learner findLearnerByEmail(String email) {
         Learner learner = null;
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT * FROM tblLearner WHERE LearnerID = ?");
-            prep.setString(1, learnerId);
+            PreparedStatement prep = conn.prepareStatement("SELECT * FROM tblUser WHERE UserRole = ? AND UserEmail = ?");
+            prep.setString(1, "Learner");
+            prep.setString(2, email);
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {
                 learner = new Learner();
-                learner.setId(rs.getString("LearnerID"));
-                learner.setLearnerFirstName(rs.getString("LearnerFirstName"));
-                learner.setLastName(rs.getString("LearnerLastName"));
-                learner.setEmail(rs.getString("LearnerEmail"));
-                learner.setLearnerPhoneNumber(rs.getString("LearnerPhone"));
-                learner.setLearnerDob(rs.getDate("LearnerDob"));
-                learner.setLearnerAge(rs.getInt("LearnerAge"));
+                learner.setId(rs.getString("UserID"));
+                learner.setLearnerFirstName(rs.getString("UserFirstName"));
+                learner.setLastName(rs.getString("UserLastName"));
+                learner.setEmail(rs.getString("UserEmail"));
+                learner.setLearnerPhoneNumber(rs.getString("UserPhone"));
+                learner.setLearnerDob(rs.getDate("UserDob"));
+                learner.setLearnerAge(rs.getInt("UserAge"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return learner;
+    }
+
+    public String getLearnerFirstName(String email) {
+        String learnerFirstName = "";
+        try {
+            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+            PreparedStatement prep = conn.prepareStatement("SELECT UserFirstName FROM tblUser WHERE UserRole = ? AND UserEmail = ?");
+            prep.setString(1, "Learner");
+            prep.setString(2, email);
+            ResultSet rs = prep.executeQuery();
+            if (rs.next()) {
+                learnerFirstName = rs.getString("UserFirstName");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return learnerFirstName;
     }
 
     private final ArrayList<String> learnerList = new ArrayList<>();
@@ -69,16 +73,15 @@ public class LearnerRepo {
         learnerList.clear();
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT * FROM tblLearner");
+            PreparedStatement prep = conn.prepareStatement("SELECT * FROM tblUser WHERE UserRole = 'Learner'");
             ResultSet rs = prep.executeQuery();
             while (rs.next()) {
-                learnerList.add(rs.getString("LearnerID"));
-                learnerList.add(rs.getString("LearnerFirstName"));
-                learnerList.add(rs.getString("LearnerLastName"));
-                learnerList.add(rs.getString("LearnerEmail"));
-                learnerList.add(rs.getString("LearnerPhone"));
-                learnerList.add(rs.getString("LearnerAge"));
-                learnerList.add(rs.getString("LearnerDob"));
+                learnerList.add(rs.getString("UserFirstName"));
+                learnerList.add(rs.getString("UserLastName"));
+                learnerList.add(rs.getString("UserEmail"));
+                learnerList.add(rs.getString("UserPhone"));
+                learnerList.add(rs.getString("UserAge"));
+                learnerList.add(rs.getString("UserDOB"));
             }
         } catch (SQLException e) {
             e.printStackTrace();

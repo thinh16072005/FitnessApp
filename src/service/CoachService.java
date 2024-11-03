@@ -68,7 +68,6 @@ public class CoachService {
     }
 
     public void viewProfile(String email) {
-        System.out.println("Coach found:");
         Coach coach = coachRepo.findCoachById(email);
         System.out.println(coach);
     }

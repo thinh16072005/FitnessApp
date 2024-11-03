@@ -48,7 +48,8 @@ public class LearnerService {
                         "@UserEmail = ?, " +
                         "@UserPhone = ?, " +
                         "@UserDOB = ?, " +
-                        "@Password = ?");
+                        "@Password = ?"
+                );
                 preparedStatement.setString(1, autoGenerateLearnerID(conn));
                 preparedStatement.setString(2, "Learner");
                 preparedStatement.setString(3, firstName);
@@ -69,7 +70,6 @@ public class LearnerService {
     }
 
     public void viewProfile(String email) {
-        System.out.println("Learner found:");
         Learner learner = learnerRepo.findLearnerByEmail(email);
         System.out.println(learner);
     }

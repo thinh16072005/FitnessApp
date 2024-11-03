@@ -11,7 +11,7 @@ public class CoachRepo {
     public boolean checkCoachIdExist(String coachId) {
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT COUNT(*) FROM tblCoach WHERE CoachID = ?");
+            PreparedStatement prep = conn.prepareStatement("SELECT COUNT(*) FROM tblUser WHERE UserRole = 'Coach' AND UserID = ?");
             prep.setString(1, coachId);
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {
@@ -69,9 +69,8 @@ public class CoachRepo {
         String coachName = "";
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT UserFirstName FROM tblUser WHERE UserRole = ? AND UserEmail = ?");
-            prep.setString(1, "Coach");
-            prep.setString(2, email);
+            PreparedStatement prep = conn.prepareStatement("SELECT UserFirstName FROM tblUser WHERE UserRole = 'Coach' AND UserEmail = ?");
+            prep.setString(1, email);
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {
                 coachName = rs.getString("UserFirstName");
@@ -90,7 +89,7 @@ public class CoachRepo {
         coachList.clear();
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT * FROM tblCoach");
+            PreparedStatement prep = conn.prepareStatement("SELECT * FROM tblUser WHERE UserRole = 'Coach'");
             ResultSet rs = prep.executeQuery();
             while (rs.next()) {
                 coachList.add(rs.getString("CoachID"));

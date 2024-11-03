@@ -91,38 +91,62 @@ public class CourseService {
 
     public void display() {
         ArrayList<String> courseList = courseRepo.getCourseList();
-        System.out.printf("%-10s %-30s %-15s %-25s %-15s %-10s %-10s%n", "CourseID", "Course Name", "Description", "Duration (days)", "Start Date", "End Date", "Coach ID");
-        System.out.println("-----------------------------------------------------------------------------------------------");
+        System.out.printf("%-10s %-20s %-20s %-20s %-15s %-15s %-10s%n", "CourseID", "Course Name", "Description", "Duration (days)", "Start Date", "End Date", "Coach ID");
+        System.out.println("-----------------------------------------------------------------------------------------------------------");
         for (int i = 0; i < courseList.size(); i += 7) {
-            System.out.printf("%-10s %-30s %-15s %-25s %-15s %-10s %-10s%n", courseList.get(i), courseList.get(i + 1), courseList.get(i + 2), courseList.get(i + 3), courseList.get(i + 4), courseList.get(i + 5), courseList.get(i + 6));
+            System.out.printf("%-10s %-20s %-20s %-20s %-15s %-15s %-10s%n", courseList.get(i), courseList.get(i + 1), courseList.get(i + 2), courseList.get(i + 3), courseList.get(i + 4), courseList.get(i + 5), courseList.get(i + 6));
         }
     }
 
     public void displayLearners(String coachId) {
-        try {
-            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement(
-                    "SELECT l.UserID, l.UserFirstName, l.UserLastName, l.UserEmail, l.UserPhone, l.UserAge, l.UserDOB " +
-                            "FROM tblUser l " +
-                            "JOIN tblSubscription s ON l.UserID = s.LearnerID " +
-                            "JOIN tblCourse c ON s.CourseID = c.CourseID " +
-                            "WHERE c.CoachID = ?");
-            prep.setString(1, coachId);
-            ResultSet rs = prep.executeQuery();
+        try (Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD)) {
 
-            System.out.printf("%-10s %-15s %-15s %-25s %-15s %-5s %-10s%n", "LearnerID", "First Name", "Last Name", "Email", "Phone", "Age", "DOB");
-            System.out.println("-----------------------------------------------------------------------------------------------");
-            while (rs.next()) {
-                System.out.printf("%-10s %-15s %-15s %-25s %-15s %-5d %-10s%n",
-                        rs.getString("LearnerID"),
-                        rs.getString("LearnerFirstName"),
-                        rs.getString("LearnerLastName"),
-                        rs.getString("LearnerEmail"),
-                        rs.getString("LearnerPhone"),
-                        rs.getInt("LearnerAge"),
-                        rs.getDate("LearnerDob").toString()
-                );
+            // First query: Get distinct CourseIDs associated with the coach
+            PreparedStatement coursePrep = conn.prepareStatement(
+                    "SELECT DISTINCT c.CourseID " +
+                            "FROM tblCourse c " +
+                            "WHERE c.UserID = ?");
+            coursePrep.setString(1, coachId);
+            ResultSet courseRs = coursePrep.executeQuery();
+
+            // Loop through each course ID
+            while (courseRs.next()) {
+                String courseId = courseRs.getString("CourseID");
+                System.out.printf("Course ID: %s%n", courseId);
+                System.out.printf("%-10s %-15s %-15s %-25s %-15s %-5s %-10s%n",
+                        "LearnerID", "First Name", "Last Name", "Email", "Phone", "Age", "DOB");
+                System.out.println("-----------------------------------------------------------------------------------------------");
+
+                // Second query: Get learners enrolled in the specific course
+                PreparedStatement learnerPrep = conn.prepareStatement(
+                        "SELECT l.UserID, l.UserFirstName, l.UserLastName, l.UserEmail, l.UserPhone, l.UserAge, l.UserDOB " +
+                                "FROM tblUser l " +
+                                "JOIN tblSubscription s ON l.UserID = s.UserID " +
+                                "WHERE s.CourseID = ?");
+                learnerPrep.setString(1, courseId);
+                ResultSet learnerRs = learnerPrep.executeQuery();
+
+                // Display each learner for the current course
+                boolean learnersFound = false;
+                while (learnerRs.next()) {
+                    learnersFound = true;
+                    System.out.printf("%-10s %-15s %-15s %-25s %-15s %-5d %-10s%n",
+                            learnerRs.getString("UserID"),
+                            learnerRs.getString("UserFirstName"),
+                            learnerRs.getString("UserLastName"),
+                            learnerRs.getString("UserEmail"),
+                            learnerRs.getString("UserPhone"),
+                            learnerRs.getInt("UserAge"),
+                            learnerRs.getDate("UserDOB").toString()
+                    );
+                }
+                if (!learnersFound) {
+                    System.out.println("No learners enrolled in this course.");
+                }
+
+                System.out.println(); // Blank line between courses for readability
             }
+
         } catch (SQLException e) {
             System.err.println("SQL Exception: " + e.getMessage());
         }
@@ -136,7 +160,7 @@ public class CourseService {
             if (resultSet.next()) {
                 String maxID = resultSet.getString("maxID");
                 if (maxID != null) {
-                    int idNumber = Integer.parseInt(maxID.substring(2)) + 1;
+                    int idNumber = Integer.parseInt(maxID.trim().substring(2)) + 1;
                     newCourseId = String.format("CS%03d", idNumber);
                 }
             }

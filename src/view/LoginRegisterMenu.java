@@ -35,7 +35,7 @@ public class LoginRegisterMenu {
                 switch (ch) {
                     case 1 -> learnerService.add();
                     case 2 -> coachService.add();
-                    case 3 -> {return;}
+                    case 3 -> System.out.println("Returning to main menu...");
                     default -> System.out.println("Invalid choice");
                 }
             }

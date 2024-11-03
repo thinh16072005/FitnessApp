@@ -45,6 +45,54 @@ public class Utils {
         }
     }
 
+    public static String getCourseId(String command, Scanner input) {
+        Pattern regex = Pattern.compile("C\\d{3}");
+        while (true) {
+            String workoutId = getString(command, input);
+            if (regex.matcher(workoutId).matches()) {
+                return workoutId;
+            } else {
+                System.out.println("Invalid input. Course ID must start with C and be followed by 3 digits.");
+            }
+        }
+    }
+
+    public static String getCoachId(String command, Scanner input) {
+        Pattern regex = Pattern.compile("CH\\d{3}");
+        while (true) {
+            String workoutId = getString(command, input);
+            if (regex.matcher(workoutId).matches()) {
+                return workoutId;
+            } else {
+                System.out.println("Invalid input. Coach ID must start with CH and be followed by 3 digits.");
+            }
+        }
+    }
+
+    public static String getLearnerId(String command, Scanner input) {
+        Pattern regex = Pattern.compile("L\\d{3}");
+        while (true) {
+            String workoutId = getString(command, input);
+            if (regex.matcher(workoutId).matches()) {
+                return workoutId;
+            } else {
+                System.out.println("Invalid input. Learner ID must start with L and be followed by 3 digits.");
+            }
+        }
+    }
+
+    public static String getSubcriptionId(String command, Scanner input) {
+        Pattern regex = Pattern.compile("S\\d{3}");
+        while (true) {
+            String workoutId = getString(command, input);
+            if (regex.matcher(workoutId).matches()) {
+                return workoutId;
+            } else {
+                System.out.println("Invalid input. Subcription ID must start with S and be followed by 3 digits.");
+            }
+        }
+    }
+
     public static int getInt(String command, Scanner input) {
         int i = 0;
         boolean validInput = false;
@@ -247,10 +295,10 @@ public class Utils {
             try {
                 LocalDate dateOfBirth = LocalDate.parse(dateStr, formatter);
                 LocalDate currentDate = LocalDate.now();
-                if (Period.between(dateOfBirth, currentDate).getYears() >= 18) {
+                if (Period.between(dateOfBirth, currentDate).getYears() >= 12 && Period.between(dateOfBirth, currentDate).getYears() <= 100) {
                     return dateStr;
                 } else {
-                    System.out.println("Employee must be at least 18 years old.");
+                    System.out.println("Learner must be at least 12 years old and under 100 years old.");
                 }
             } catch (DateTimeParseException e) {
                 System.out.println("Invalid date format. Please enter the date in dd/MM/yyyy format.");
@@ -382,7 +430,6 @@ public class Utils {
                 System.out.println("Invalid input. Platform must be either 'Online' or 'Offline'.");
             }
         }
-
     }
 
 }

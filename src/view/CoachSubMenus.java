@@ -1,13 +1,14 @@
 package view;
 
+import repository.CoachRepo;
 import service.CourseService;
 import service.ExerciseService;
-import service.WorkoutService;
 
 public class CoachSubMenus {
 
     public void displayCourseMenu(String email) throws Exception {
         CourseService courseService = new CourseService();
+        CoachRepo coachRepo = new CoachRepo();
         String[] courseOptions = {
                 "View course",
                 "Create course",
@@ -24,36 +25,36 @@ public class CoachSubMenus {
                     case 2 -> courseService.add(email);
                     case 3 -> courseService.update();
                     case 4 -> courseService.delete();
-                    case 5 -> courseService.displayLearners(email);
+                    case 5 -> courseService.displayLearners(coachRepo.getCoachIDByEmail(email));
                 }
             }
         };
         courseMenu.run();
     }
 
-    public void displayWorkoutMenu() throws Exception {
-        WorkoutService workoutService = new WorkoutService();
-
-        String[] workoutOptions = {
-                "View workout",
-                "Create workout",
-                "Update workout",
-                "Delete workout",
-                "Exit"
-        };
-        Menu workoutMenu = new Menu("WORKOUT MANAGEMENT", workoutOptions) {
-            @Override
-            public void execute(int ch) throws ClassNotFoundException {
-                switch (ch) {
-                    case 1 -> workoutService.display();
-                    case 2 -> workoutService.add();
-                    case 3 -> workoutService.update();
-                    case 4 -> workoutService.delete();
-                }
-            }
-        };
-        workoutMenu.run();
-    }
+//    public void displayWorkoutMenu() throws Exception {
+//        WorkoutService workoutService = new WorkoutService();
+//
+//        String[] workoutOptions = {
+//                "View workout",
+//                "Create workout",
+//                "Update workout",
+//                "Delete workout",
+//                "Exit"
+//        };
+//        Menu workoutMenu = new Menu("WORKOUT MANAGEMENT", workoutOptions) {
+//            @Override
+//            public void execute(int ch) throws ClassNotFoundException {
+//                switch (ch) {
+//                    case 1 -> workoutService.display();
+//                    case 2 -> workoutService.add();
+//                    case 3 -> workoutService.update();
+//                    case 4 -> workoutService.delete();
+//                }
+//            }
+//        };
+//        workoutMenu.run();
+//    }
 
     public void displayExerciseMenu() throws Exception {
         ExerciseService exerciseService = new ExerciseService();

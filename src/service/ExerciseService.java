@@ -1,25 +1,21 @@
 package service;
 
 import model.JDBC;
+import model.Slot;
 import repository.ExerciseRepo;
-import repository.WorkoutRepo;
 import utils.Utils;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class ExerciseService {
     Scanner input = new Scanner(System.in);
     ExerciseRepo exerciseRepo = new ExerciseRepo();
-    WorkoutRepo workoutRepo = new WorkoutRepo();
 
     public void add() {
-        String workoutID = Utils.getWorkoutId("Enter workout ID (Wxxx): ", input);
-        if (!workoutRepo.checkWorkoutIdExist(workoutID)) {
-            System.out.println("Workout ID does not exist!");
-            return;
-        }
+
         String exerciseName = Utils.getString("Enter exercise name: ", input);
         int duration = Utils.getInt("Enter duration: ", input);
         int set = Utils.getInt("Enter set: ", input);
@@ -90,13 +86,48 @@ public class ExerciseService {
 
     public void display() {
         ArrayList<String> exerciseList = exerciseRepo.getExerciseList();
-        System.out.printf("%-10s %-20s %-20s %-25s %-15s %-10s %-20s%n", "Exercise ID", "Exercise Name", "Duration (mins)", "Workout ID", "Sets", "Reps", "Calories");
+        System.out.printf("%-10s %-20s %-20s %-15s %-10s %-20s%n", "Exercise ID", "Exercise Name", "Duration (mins)", "Sets", "Reps", "Calories");
         System.out.println("-----------------------------------------------------------------------------------------------");
-        for (int i = 0; i < exerciseList.size(); i += 7) {
-            System.out.printf("%-10s %-20s %-20s %-25s %-15s %-15s %-20s%n", exerciseList.get(i), exerciseList.get(i + 1), exerciseList.get(i + 2), exerciseList.get(i + 3), exerciseList.get(i + 4), exerciseList.get(i + 5), exerciseList.get(i + 6));
+        for (int i = 0; i < exerciseList.size(); i += 6) {
+            System.out.printf("%-10s %-20s %-20s %-15s %-15s %-20s%n", exerciseList.get(i), exerciseList.get(i + 1), exerciseList.get(i + 2), exerciseList.get(i + 3), exerciseList.get(i + 4), exerciseList.get(i + 5));
         }
     }
 
+
+    public void ExerciseToCourse() {
+        String courseId = Utils.getString("Enter Course ID: ", input);
+        ArrayList<String> exerciseIds = new ArrayList<>();
+
+        while (true) {
+            String exerciseId = Utils.getString("Enter Exercise ID (or type 'done' to finish): ", input);
+            if (exerciseId.equalsIgnoreCase("done")) {
+                break;
+            }
+            if (!exerciseRepo.checkExerciseIdExist(exerciseId)) {
+                System.out.println("Exercise ID does not exist!");
+            } else {
+                exerciseIds.add(exerciseId);
+            }
+        }
+
+        if (exerciseIds.isEmpty()) {
+            System.out.println("No exercises to add.");
+            return;
+        }
+
+        try (Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD)) {
+            PreparedStatement prep = conn.prepareStatement("INSERT INTO tblExercise_Course (CourseID, ExerciseID) VALUES (?, ?)");
+            for (String exerciseId : exerciseIds) {
+                prep.setString(1, courseId);
+                prep.setString(2, exerciseId);
+                prep.addBatch();
+            }
+            prep.executeBatch();
+            System.out.println("Exercises added to course successfully.");
+        } catch (SQLException e) {
+            System.err.println("SQL Exception: " + e.getMessage());
+        }
+    }
 
     private static String autoGenerateExerciseID(Connection connection) {
         String newExerciseID = "E001";
@@ -114,5 +145,65 @@ public class ExerciseService {
             System.err.println("SQL Exception: " + e.getMessage());
         }
         return newExerciseID;
+    }
+
+    public void distributeExercisesToSlots(String courseId) {
+        try (Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD)) {
+            // Retrieve all exercises for the given course
+            PreparedStatement getExercises = conn.prepareStatement("SELECT ExerciseID FROM tblExercise_Course WHERE CourseID = ?");
+            getExercises.setString(1, courseId);
+            ResultSet exercisesRs = getExercises.executeQuery();
+
+            List<String> exerciseIds = new ArrayList<>();
+            while (exercisesRs.next()) {
+                exerciseIds.add(exercisesRs.getString("ExerciseID"));
+            }
+
+            if (exerciseIds.isEmpty()) {
+                System.out.println("No exercises found for the given course.");
+                return;
+            }
+
+            // Retrieve all slots for the given course
+            PreparedStatement getSlots = conn.prepareStatement("SELECT SlotID, TimeStart, TimeEnd FROM tblSlot WHERE CourseID = ?");
+            getSlots.setString(1, courseId);
+            ResultSet slotsRs = getSlots.executeQuery();
+
+            List<Slot> slots = new ArrayList<>();
+            while (slotsRs.next()) {
+                String slotId = slotsRs.getString("SlotID");
+                Time timeStart = slotsRs.getTime("TimeStart");
+                Time timeEnd = slotsRs.getTime("TimeEnd");
+                slots.add(new Slot(slotId, null, null, null, null, timeStart, timeEnd));
+            }
+
+            if (slots.isEmpty()) {
+                System.out.println("No slots found for the given course.");
+                return;
+            }
+
+            // Distribute exercises to slots
+            int exerciseIndex = 0;
+            for (Slot slot : slots) {
+                if (exerciseIndex >= exerciseIds.size()) {
+                    break;
+                }
+
+                String exerciseId = exerciseIds.get(exerciseIndex);
+                slot.setExerciseId(exerciseId);
+
+                // Update the slot with the exercise ID
+                PreparedStatement updateSlot = conn.prepareStatement("UPDATE tblSlot SET ExerciseID = ? WHERE SlotID = ?");
+                updateSlot.setString(1, exerciseId);
+                updateSlot.setString(2, slot.getSlotId());
+                updateSlot.executeUpdate();
+
+                exerciseIndex++;
+            }
+
+            System.out.println("Exercises distributed to slots successfully.");
+        } catch (SQLException e) {
+            System.err.println("SQL Exception: " + e.getMessage());
+        }
     }
 }

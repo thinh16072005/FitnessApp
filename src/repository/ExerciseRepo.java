@@ -36,7 +36,6 @@ public class ExerciseRepo {
                 exerciseList.add(rs.getString("ExerciseID"));
                 exerciseList.add(rs.getString("ExerciseName"));
                 exerciseList.add(rs.getString("ExerciseDuration"));
-                exerciseList.add(rs.getString("WorkoutID"));
                 exerciseList.add(rs.getString("Sets"));
                 exerciseList.add(rs.getString("Reps"));
                 exerciseList.add(rs.getString("CaloriesBurn"));

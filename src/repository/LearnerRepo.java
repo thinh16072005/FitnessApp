@@ -24,7 +24,21 @@ public class LearnerRepo {
         return false;
     }
 
-
+    public String getLearnerIDByEmail(String email) {
+        String learnerID = "";
+        try {
+            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+            PreparedStatement prep = conn.prepareStatement("SELECT UserID FROM tblUser WHERE UserRole = 'Learner' AND UserEmail = ?");
+            prep.setString(1, email);
+            ResultSet rs = prep.executeQuery();
+            if (rs.next()) {
+                learnerID = rs.getString("UserID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return learnerID;
+    }
 
     public Learner findLearnerByEmail(String email) {
         Learner learner = null;
@@ -54,9 +68,8 @@ public class LearnerRepo {
         String learnerFirstName = "";
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT UserFirstName FROM tblUser WHERE UserRole = ? AND UserEmail = ?");
-            prep.setString(1, "Learner");
-            prep.setString(2, email);
+            PreparedStatement prep = conn.prepareStatement("SELECT UserFirstName FROM tblUser WHERE UserRole = 'Learner' AND UserEmail = ?");
+            prep.setString(1, email);
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {
                 learnerFirstName = rs.getString("UserFirstName");

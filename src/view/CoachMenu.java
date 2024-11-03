@@ -6,7 +6,7 @@ import service.CoachService;
 public class CoachMenu {
     public static String[] coachOptions = {
             "Course Management",
-            "Workout Management",
+//            "Workout Management",
             "Exercise Management",
             "View profile",
             "Update profile",
@@ -24,12 +24,12 @@ public class CoachMenu {
             public void execute(int ch) throws Exception {
                 switch (ch) {
                     case 1 -> coachSubMenus.displayCourseMenu(email);
-                    case 2 -> coachSubMenus.displayWorkoutMenu();
-                    case 3 -> coachSubMenus.displayExerciseMenu();
-                    case 4 -> coachService.viewProfile(email);
-                    case 5 -> coachService.update(email, "Coach");
-                    case 6 -> coachService.updatePassword(email);
-                    case 7 -> System.out.println("\nLogging out...");
+//                    case 2 -> coachSubMenus.displayWorkoutMenu();
+                    case 2 -> coachSubMenus.displayExerciseMenu();
+                    case 3 -> coachService.viewProfile(email);
+                    case 4 -> coachService.update(email, "Coach");
+                    case 5 -> coachService.updatePassword(email);
+                    case 6 -> System.out.println("\nLogging out...");
                 }
             }
         };

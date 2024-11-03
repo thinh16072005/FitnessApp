@@ -1,7 +1,6 @@
 package repository;
 
 import model.JDBC;
-import model.Learner;
 import model.Subscription;
 
 import java.sql.*;
@@ -12,6 +11,7 @@ import java.util.PriorityQueue;
 import java.util.Comparator;
 
 public class SubscriptionRepo {
+    LearnerRepo learnerRepo = new LearnerRepo();
 
     public Subscription findSubscriptionById(String subId) {
         Subscription sub = null;
@@ -60,7 +60,7 @@ public class SubscriptionRepo {
             ResultSet rs = prep.executeQuery();
             while (rs.next()) {
                 subscriptionList.add(rs.getString("SubscriptionID"));
-                subscriptionList.add(rs.getString("LearnerID"));
+                subscriptionList.add(rs.getString("UserID"));
                 subscriptionList.add(rs.getString("CourseID"));
                 subscriptionList.add(rs.getString("EnrollDate"));
                 subscriptionList.add(rs.getString("Status"));
@@ -98,13 +98,14 @@ public class SubscriptionRepo {
         return courseName;
     }
 
-    public String getSubscriptionId(String learnerId, String courseId) {
+    public String getSubscriptionId(String email, String courseId) {
         String subscriptionId = null;
         try {
             Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT SubscriptionID FROM tblSubscription WHERE LearnerID = ? AND CourseID = ?");
-            prep.setString(1, learnerId);
+            PreparedStatement prep = conn.prepareStatement("SELECT SubscriptionID FROM tblSubscription WHERE UserID = ? AND CourseID = ?");
+            prep.setString(1, learnerRepo.getLearnerIDByEmail(email));
             prep.setString(2, courseId);
+
             ResultSet rs = prep.executeQuery();
             if (rs.next()) {
                 subscriptionId = rs.getString("SubscriptionID");

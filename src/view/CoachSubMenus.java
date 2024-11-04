@@ -26,6 +26,8 @@ public class CoachSubMenus {
                     case 3 -> courseService.update();
                     case 4 -> courseService.delete();
                     case 5 -> courseService.displayLearners(coachRepo.getCoachIDByEmail(email));
+                    case 6 -> System.out.println("Exiting...");
+                    default -> System.out.println("Invalid option");
                 }
             }
         };
@@ -62,6 +64,7 @@ public class CoachSubMenus {
         String[] exerciseOptions = {
                 "View exercise",
                 "Create exercise",
+                "Add exercise to course",
                 "Update exercise",
                 "Delete exercise",
                 "Exit"
@@ -72,8 +75,11 @@ public class CoachSubMenus {
                 switch (ch) {
                     case 1 -> exerciseService.display();
                     case 2 -> exerciseService.add();
-                    case 3 -> exerciseService.update();
-                    case 4 -> exerciseService.delete();
+                    case 3 -> exerciseService.ExerciseToCourse();
+                    case 4 -> exerciseService.update();
+                    case 5 -> exerciseService.delete();
+                    case 6 -> System.out.println("Exiting...");
+                    default -> System.out.println("Invalid option");
                 }
             }
         };

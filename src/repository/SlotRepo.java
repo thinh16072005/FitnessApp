@@ -59,6 +59,22 @@ public class SlotRepo {
         return slots;
     }
 
+    public String getSlotIdByCourseId(String courseId) {
+        String slotId = "";
+        try {
+            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+            PreparedStatement prep = conn.prepareStatement("SELECT SlotID FROM tblSlot WHERE CourseID = ?");
+            prep.setString(1, courseId);
+            ResultSet rs = prep.executeQuery();
+            if (rs.next()) {
+                slotId = rs.getString("SlotID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return slotId;
+    }
+
     // Method to insert a new slot into the database
     public void insertSlot(Slot slot) {
         try (Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD)) {
@@ -75,6 +91,22 @@ public class SlotRepo {
             e.printStackTrace();
         }
     }
+
+//    public String getSubscriptionIdByCourseId(String courseId) {
+//        String subscriptionId = "";
+//        try {
+//            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+//            PreparedStatement prep = conn.prepareStatement("SELECT SubscriptionID FROM tblSubscription WHERE CourseID = ?");
+//            prep.setString(1, courseId);
+//            ResultSet rs = prep.executeQuery();
+//            if (rs.next()) {
+//                subscriptionId = rs.getString("SubscriptionID");
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return subscriptionId;
+//    }
 
     // Method to update an existing slot
 //    public void updateSlot(Slot slot) {

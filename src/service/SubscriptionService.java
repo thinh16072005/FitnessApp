@@ -23,20 +23,23 @@ public class SubscriptionService {
     LearnerRepo learnerRepo = new LearnerRepo();
     SlotService slotService = new SlotService();
 
+    // Intensity Level (number of sessions per week);
+    int totalExercises = 0;
+//    int slotsNeeded = 0;
+
     private final ArrayList<Integer> weeklySlots = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0, 0));
 
     public void register(String learnerEmail) {
-        int totalExercises = 0;
         courseService.display();
         String courseId = Utils.getString("Enter course ID (CSxxx): ", input);
         if (!courseRepo.checkCourseIdExist(courseId)) {
             System.out.println("Course ID does not exist!");
             return;
         }
-        // Determine Intensity Level (number of sessions per week)
+//        // Intensity Level (number of sessions per week)
         int sessionsPerWeek = getIntensityLevel();
 
-        // Determine Stamina Level (duration per session)
+        // Stamina Level (duration per session)
         int sessionDuration = getStaminaLevel();
 
         // Retrieve the number of exercises for the course;
@@ -51,7 +54,7 @@ public class SubscriptionService {
             throw new RuntimeException(e);
         }
 
-        int slotsNeeded = totalExercises / sessionsPerWeek;  // Calculate number of slots
+//        int slotsNeeded = totalExercises / sessionsPerWeek;  // Calculate number of slots
 
         // Register daily schedule
         System.out.println("Please schedule your sessions for the week.");
@@ -97,9 +100,9 @@ public class SubscriptionService {
             prep.executeUpdate();
 
             // Generate slots and distribute exercises based on the schedule and calculated slotsNeeded
-            System.out.println(slotsNeeded);
+//            System.out.println(slotsNeeded);
             for (Map.Entry<String, String> entry : weeklySchedule.entrySet()) {
-                for (int j = 0; j < slotsNeeded; j++) {
+                for (int j = 0; j < (totalExercises / sessionsPerWeek); j++) {
                     slotService.generateSlotsAndDistributeExercises(subscriptionId, courseId, entry.getValue(), learnerRepo.getLearnerIDByEmail(learnerEmail));
                 }
             }
@@ -109,6 +112,10 @@ public class SubscriptionService {
             System.err.println("SQL Exception: " + e.getMessage());
         }
     }
+
+//    public int getNumberOfSlots() {;
+//        return totalExercises / sessionsPerWeek;
+//    }
 
     private int getIntensityLevel() {
         System.out.println("Select your intensity level:");
@@ -217,7 +224,7 @@ public class SubscriptionService {
             return;
         }
         String confirm = Utils.getString("Confirm unenrollment? (Y/N): ", input);
-        if (!confirm.equalsIgnoreCase("Y")) {
+        if (!confirm.equalsIgnoreCase("N")) {
             System.out.println("Unenrollment cancelled.");
             return;
         }

@@ -33,7 +33,7 @@ public class LearnerMenu {
         CourseService courseService = new CourseService();
         SlotRepo slotRepo = new SlotRepo(); // Initialize or get an instance
         SlotService slotService = new SlotService(slotRepo); // Pass slotRepo to constructor
-        Slot slot = new Slot();
+//        Slot slot = new Slot();
 
         Menu coachMenu = new Menu("\nHELLO, LEARNER " + learnerRepo.getLearnerFirstName(email), learnerOptions) {
             @Override
@@ -45,9 +45,10 @@ public class LearnerMenu {
                         subscriptionService.viewWeeklySubscription(email, courseId);
                     }
                     case 2 -> {
+                        courseService.display();
                         String courseId = Utils.getString("Enter course ID: ", input);
-                        slotService.printSlotDetails(slot.getSlotId());
-
+//                        slotService.printSlotDetails(slotRepo.getSlotIdByCourseId(courseId));
+                        slotService.printWorkoutSchedule(courseId);
                     }
                     case 3 -> subscriptionService.register(email);
                     case 4 -> subscriptionService.unenroll();

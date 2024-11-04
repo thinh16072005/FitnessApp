@@ -23,17 +23,6 @@ public class Slot {
     }
 
     public String getSlotId() {
-        String slotId = "";
-        try {
-            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT SlotID FROM tblSlot WHERE CourseID = ?");
-            ResultSet rs = prep.executeQuery();
-            if (rs.next()) {
-                slotId = rs.getString("CourseID");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
         return slotId;
     }
 
@@ -42,17 +31,17 @@ public class Slot {
     }
 
     public String getExerciseId() {
-        String exerciseId = "";
-        try {
-            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
-            PreparedStatement prep = conn.prepareStatement("SELECT ExerciseID FROM tblExercise");
-            ResultSet rs = prep.executeQuery();
-            if (rs.next()) {
-                exerciseId = rs.getString("ExerciseID");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+//        String exerciseId = "";
+//        try {
+//            Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD);
+//            PreparedStatement prep = conn.prepareStatement("SELECT ExerciseID FROM tblExercise");
+//            ResultSet rs = prep.executeQuery();
+//            if (rs.next()) {
+//                exerciseId = rs.getString("ExerciseID");
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
         return exerciseId;
     }
 

@@ -2,17 +2,23 @@ package service;
 
 import model.JDBC;
 import model.Slot;
+import repository.ExerciseRepo;
 import repository.SlotRepo;
 
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SlotService {
     ExerciseService exerciseService = new ExerciseService();
-    private SlotRepo slotRepo;
+    ExerciseRepo exerciseRepo = new ExerciseRepo();
+    SlotRepo slotRepo;
+    CourseService courseService;
 
     public SlotService() {}
 
@@ -43,7 +49,7 @@ public class SlotService {
             PreparedStatement insertSlot = conn.prepareStatement(
                     "INSERT INTO tblSlot (SlotID, CourseID, UserID, ExerciseID, ScheduleID, TimeStart, TimeEnd) VALUES (?, ?, ?, ?, ?, ?, ?)"
             );
-            insertSlot.setString(1, slot.getSlotId());
+            insertSlot.setString(1,generateSlotId(conn));
             insertSlot.setString(2, slot.getCourseId());
             insertSlot.setString(3, userId);
             insertSlot.setString(4, slot.getExerciseId());
@@ -63,18 +69,39 @@ public class SlotService {
         }
     }
 
+    // Helper function to insert the slot into the database
+    private void insertSlotIntoDatabase(Connection conn, Slot slot, String userId) throws SQLException {
+        PreparedStatement insertSlotStmt = conn.prepareStatement(
+                "INSERT INTO tblSlot (SlotID, CourseID, UserID, ExerciseID, ScheduleID, TimeStart, TimeEnd) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        );
+        insertSlotStmt.setString(1, generateSlotId(conn));
+        insertSlotStmt.setString(2, slot.getCourseId());
+        insertSlotStmt.setString(3, userId);
+        insertSlotStmt.setString(4, slot.getExerciseId());
+        insertSlotStmt.setString(5, slot.getScheduleId());
+        insertSlotStmt.setTime(6, slot.getTimeStart());
+        insertSlotStmt.setTime(7, slot.getTimeEnd());
+        insertSlotStmt.executeUpdate();
+    }
+
+
+
     // Method to display a slot's schedule and exercises by SlotID
     public void printSlotDetails(String slotId) {
         Slot slot = slotRepo.getSlotById(slotId);
-
         if (slot != null) {
-            System.out.printf("Slot ID: %s%n", slot.getSlotId());
+//            System.out.printf("Slot ID: %s%n", slot.getSlotId());
             System.out.printf("Time: %s - %s%n", slot.getTimeStart(), slot.getTimeEnd());
-
             System.out.println("Exercises:");
-            String[] exercises = slot.getExerciseId().split(",");
-            for (String exercise : exercises) {
-                System.out.printf("- %s%n", exercise.trim());
+
+            String[] exerciseIds = slot.getExerciseId().split(",");
+            for (String exerciseId : exerciseIds) {
+                String exerciseName = exerciseRepo.getExerciseNameById(exerciseId.trim());
+                if (exerciseName != null) {
+                    System.out.printf("- %s (ID: %s)%n", exerciseName, exerciseId.trim());
+                } else {
+                    System.out.printf("- Exercise with ID %s not found%n", exerciseId.trim());
+                }
             }
         } else {
             System.out.println("Slot not found!");
@@ -82,37 +109,90 @@ public class SlotService {
     }
 
     // Method to display all slots and exercises for a specific workout
-    public void printWorkoutSchedule(String workoutId) {
-        List<Slot> slots = slotRepo.getSlotsByCourseId(workoutId);
+    public void printWorkoutSchedule(String courseId) {
+        List<Slot> slots = slotRepo.getSlotsByCourseId(courseId);
 
         if (slots.isEmpty()) {
-            System.out.printf("No slots found for Course ID: %s%n", workoutId);
-        } else {
-            System.out.printf("Workout Schedule for Course ID: %s%n", workoutId);
-            System.out.println("+-------------------+----------------------+");
-            System.out.println("| Time              | Exercises            |");
-            System.out.println("++------------------+----------------------+");
-
-            for (Slot slot : slots) {
-                String exercises = String.join(", ", slot.getExerciseId().split(","));
-                System.out.printf("| %-17s | %-20s |%n",
-                        slot.getTimeStart() + " - " + slot.getTimeEnd(),
-                        exercises);
-            }
-            System.out.println("+-------------+-------------------+----------------------+");
+            System.out.printf("No slots found for Course ID: %s%n", courseId);
+            return;
         }
+
+        System.out.printf("Workout Schedule for Course ID: %s%n", courseId);
+        System.out.println("+------------+------------+----------------------+----------------------+");
+        System.out.println("| Week       | Day        | Time                | Exercises            |");
+        System.out.println("+------------+------------+----------------------+----------------------+");
+
+        int slotNumber = 1;
+        int currentWeek = 1;
+
+        try (Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD)) {
+            // SQL query to fetch the schedule for each day of the week for the given courseId
+            String scheduleQuery = """
+                SELECT s.Sunday, s.Monday, s.Tuesday, s.Wednesday, s.Thursday, s.Friday, s.Saturday
+                FROM tblSchedule s
+                JOIN tblSubscription sub ON s.subscriptionID = sub.subscriptionID
+                JOIN tblCourse c ON sub.courseID = c.courseID
+                WHERE c.courseID = ?
+                """;
+
+            PreparedStatement stmt = conn.prepareStatement(scheduleQuery);
+            stmt.setString(1, courseId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                System.out.println("No schedule found for the specified course ID.");
+                return;
+            }
+
+            // Loop through weeks and days, using schedule data from tblSchedule
+            for (int weekStartIndex = 0; weekStartIndex < slots.size(); weekStartIndex += 7) {
+                System.out.printf("| Week %d      |            |                      |                      |%n", currentWeek);
+
+                for (int dayOffset = 0; dayOffset < 7 && weekStartIndex + dayOffset < slots.size(); dayOffset++) {
+                    Slot slot = slots.get(weekStartIndex + dayOffset);
+                    String dayOfWeek = getDayName(dayOffset);
+
+                    // Retrieve time slot for the current day
+                    String timeRange = rs.getString(dayOfWeek);
+                    if (timeRange == null) continue; // Skip if there's no slot for the day
+
+                    // Retrieve exercise names only if there is a time slot for the day
+                    String[] exerciseIds = slot.getExerciseId().split(",");
+                    String exercises = Arrays.stream(exerciseIds)
+                            .map(id -> exerciseRepo.getExerciseNameById(id.trim()))
+                            .collect(Collectors.joining(", "));
+
+                    // Print slot information
+                    System.out.printf("| %-10d | %-10s | %-20s | %-20s |%n", slotNumber, dayOfWeek, timeRange, exercises);
+                    slotNumber++;
+                }
+                currentWeek++;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("SQL Exception: " + e.getMessage());
+        }
+
+        System.out.println("+------------+------------+----------------------+----------------------+");
     }
 
-    private String generateSlotId(Connection connection) {
+
+    // Helper function to get day name from an offset (0 for Sunday, 6 for Saturday)
+    private String getDayName(int dayOffset) {
+        String[] days = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+        return days[dayOffset];
+    }
+
+    public String generateSlotId(Connection connection) {
         String newSlotId = "SL001";
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT MAX(ScheduleID) AS maxID FROM tblSchedule");
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT MAX(SlotID) AS maxID FROM tblSlot");
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 String maxID = resultSet.getString("maxID");
                 if (maxID != null) {
                     int idNumber = Integer.parseInt(maxID.trim().substring(2)) + 1;
-                    newSlotId = String.format("SC%03d", idNumber);
+                    newSlotId = String.format("SL%03d", idNumber);
                 }
             }
         } catch (SQLException e) {

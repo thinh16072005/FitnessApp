@@ -1,15 +1,11 @@
 package controller;
 
-import repository.SlotRepo;
-import service.SlotService;
 import view.*;
 
 public class Main extends Menu {
     static String[] loginOptions = {"Login", "Register", "Exit"};
 
     public Main(String title, String[] options) {
-
-
         super(title, options);
     }
 

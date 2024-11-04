@@ -3,6 +3,7 @@ package service;
 import model.JDBC;
 import model.Slot;
 import repository.ExerciseRepo;
+import repository.SlotRepo;
 import utils.Utils;
 
 import java.sql.*;
@@ -13,9 +14,9 @@ import java.util.Scanner;
 public class ExerciseService {
     Scanner input = new Scanner(System.in);
     ExerciseRepo exerciseRepo = new ExerciseRepo();
+    CourseService courseService = new CourseService();
 
     public void add() {
-
         String exerciseName = Utils.getString("Enter exercise name: ", input);
         int duration = Utils.getInt("Enter duration: ", input);
         int set = Utils.getInt("Enter set: ", input);
@@ -63,6 +64,18 @@ public class ExerciseService {
         }
     }
 
+    private void addExerciseToCourse(String courseId, String exerciseId) {
+        try (Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD)) {
+            PreparedStatement prep = conn.prepareStatement("INSERT INTO tblExercise_Course (CourseID, ExerciseID) VALUES (?, ?)");
+            prep.setString(1, courseId);
+            prep.setString(2, exerciseId);
+            prep.executeUpdate();
+            System.out.println("Exercise added to course successfully.");
+        } catch (SQLException e) {
+            System.err.println("SQL Exception: " + e.getMessage());
+        }
+    }
+
     public void update() {
         String exerciseID = Utils.getExerciseId("Enter exercise ID: ", input);
         if (!exerciseRepo.checkExerciseIdExist(exerciseID)) {
@@ -95,10 +108,12 @@ public class ExerciseService {
 
 
     public void ExerciseToCourse() {
+        courseService.display();
         String courseId = Utils.getString("Enter Course ID: ", input);
         ArrayList<String> exerciseIds = new ArrayList<>();
 
         while (true) {
+            display();
             String exerciseId = Utils.getString("Enter Exercise ID (or type 'done' to finish): ", input);
             if (exerciseId.equalsIgnoreCase("done")) {
                 break;
@@ -106,15 +121,14 @@ public class ExerciseService {
             if (!exerciseRepo.checkExerciseIdExist(exerciseId)) {
                 System.out.println("Exercise ID does not exist!");
             } else {
+                addExerciseToCourse(courseId, exerciseId);
                 exerciseIds.add(exerciseId);
             }
         }
-
         if (exerciseIds.isEmpty()) {
             System.out.println("No exercises to add.");
             return;
         }
-
         try (Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD)) {
             PreparedStatement prep = conn.prepareStatement("INSERT INTO tblExercise_Course (CourseID, ExerciseID) VALUES (?, ?)");
             for (String exerciseId : exerciseIds) {
@@ -148,6 +162,7 @@ public class ExerciseService {
     }
 
     public void distributeExercisesToSlots(String courseId) {
+        SlotRepo slotRepo = new SlotRepo();
         try (Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD)) {
             // Retrieve all exercises for the given course
             PreparedStatement getExercises = conn.prepareStatement("SELECT ExerciseID FROM tblExercise_Course WHERE CourseID = ?");
@@ -188,10 +203,8 @@ public class ExerciseService {
                 if (exerciseIndex >= exerciseIds.size()) {
                     break;
                 }
-
                 String exerciseId = exerciseIds.get(exerciseIndex);
                 slot.setExerciseId(exerciseId);
-
                 // Update the slot with the exercise ID
                 PreparedStatement updateSlot = conn.prepareStatement("UPDATE tblSlot SET ExerciseID = ? WHERE SlotID = ?");
                 updateSlot.setString(1, exerciseId);

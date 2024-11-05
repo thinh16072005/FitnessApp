@@ -8,10 +8,7 @@ import repository.SlotRepo;
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SlotService {
@@ -110,30 +107,29 @@ public class SlotService {
 
     // Method to display all slots and exercises for a specific workout
     public void printWorkoutSchedule(String courseId) {
-        List<Slot> slots = slotRepo.getSlotsByCourseId(courseId);
+        Queue<Slot> slotQueue = new LinkedList<>(slotRepo.getSlotsByCourseId(courseId));
 
-        if (slots.isEmpty()) {
+        if (slotQueue.isEmpty()) {
             System.out.printf("No slots found for Course ID: %s%n", courseId);
             return;
         }
 
         System.out.printf("Workout Schedule for Course ID: %s%n", courseId);
         System.out.println("+------------+------------+----------------------+----------------------+");
-        System.out.println("| Week       | Day        | Time                | Exercises            |");
+        System.out.println("| Week      | Day        | Time                | Exercises            |");
         System.out.println("+------------+------------+----------------------+----------------------+");
 
         int slotNumber = 1;
         int currentWeek = 1;
 
         try (Connection conn = DriverManager.getConnection(JDBC.DB_URL, JDBC.DB_USERNAME, JDBC.DB_PASSWORD)) {
-            // SQL query to fetch the schedule for each day of the week for the given courseId
             String scheduleQuery = """
-                SELECT s.Sunday, s.Monday, s.Tuesday, s.Wednesday, s.Thursday, s.Friday, s.Saturday
-                FROM tblSchedule s
-                JOIN tblSubscription sub ON s.subscriptionID = sub.subscriptionID
-                JOIN tblCourse c ON sub.courseID = c.courseID
-                WHERE c.courseID = ?
-                """;
+            SELECT s.Sunday, s.Monday, s.Tuesday, s.Wednesday, s.Thursday, s.Friday, s.Saturday
+            FROM tblSchedule s
+            JOIN tblSubscription sub ON s.subscriptionID = sub.subscriptionID
+            JOIN tblCourse c ON sub.courseID = c.courseID
+            WHERE c.courseID = ?
+            """;
 
             PreparedStatement stmt = conn.prepareStatement(scheduleQuery);
             stmt.setString(1, courseId);
@@ -144,25 +140,30 @@ public class SlotService {
                 return;
             }
 
-            // Loop through weeks and days, using schedule data from tblSchedule
-            for (int weekStartIndex = 0; weekStartIndex < slots.size(); weekStartIndex += 7) {
+            String[] daysOfWeek = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+            while (!slotQueue.isEmpty()) {
                 System.out.printf("| Week %d      |            |                      |                      |%n", currentWeek);
 
-                for (int dayOffset = 0; dayOffset < 7 && weekStartIndex + dayOffset < slots.size(); dayOffset++) {
-                    Slot slot = slots.get(weekStartIndex + dayOffset);
-                    String dayOfWeek = getDayName(dayOffset);
-
-                    // Retrieve time slot for the current day
+                for (String dayOfWeek : daysOfWeek) {
                     String timeRange = rs.getString(dayOfWeek);
-                    if (timeRange == null) continue; // Skip if there's no slot for the day
 
-                    // Retrieve exercise names only if there is a time slot for the day
+                    if (timeRange == null || !timeRange.matches("\\d+-\\d+")) {
+                        continue; // Skip this day if there's no valid time
+                    }
+
+                    Slot slot = slotQueue.poll(); // Dequeue the next slot only if the day has a valid time
+                    if (slot == null) {
+                        break;
+                    }
+
+                    // Get exercise names associated with the slot
                     String[] exerciseIds = slot.getExerciseId().split(",");
                     String exercises = Arrays.stream(exerciseIds)
                             .map(id -> exerciseRepo.getExerciseNameById(id.trim()))
                             .collect(Collectors.joining(", "));
 
-                    // Print slot information
+                    // Print the slot details
                     System.out.printf("| %-10d | %-10s | %-20s | %-20s |%n", slotNumber, dayOfWeek, timeRange, exercises);
                     slotNumber++;
                 }
